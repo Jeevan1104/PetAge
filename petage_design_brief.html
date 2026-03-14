@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetAge Design Brief v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#0B1F3A;--blue:#1C5EA8;--midblue:#3B82C4;--paleblue:#E8F2FB;
+    --teal:#0E7490;--paleteal:#CCFBF1;
+    --amber:#92400E;--paleamber:#FEF3C7;
+    --green:#15803D;--palegreen:#DCFCE7;
+    --red:#9F1239;--palered:#FFE4E6;
+    --surface:#F7F9FC;--card:#FFFFFF;
+    --border:#DDE4EF;--border2:#C5D0E0;
+    --text:#1A2540;--text2:#4A5568;--text3:#8896AA;
+    --r:12px;--rs:8px;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);line-height:1.6}
+  .hero{background:var(--navy);padding:56px 48px 48px;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-80px;right:-60px;width:340px;height:340px;border-radius:50%;border:1px solid rgba(255,255,255,.06)}
+  .hero::after{content:'';position:absolute;bottom:-120px;right:40px;width:220px;height:220px;border-radius:50%;border:1px solid rgba(255,255,255,.04)}
+  .hero-eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7DD3FC;font-weight:500;margin-bottom:16px}
+  .hero-title{font-family:'DM Serif Display',serif;font-size:48px;line-height:1.1;color:#fff;margin-bottom:8px}
+  .hero-title em{font-style:italic;color:#7DD3FC}
+  .hero-sub{font-size:15px;color:#94A3B8;margin-bottom:32px;max-width:600px;line-height:1.7}
+  .hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+  .hero-tag{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#CBD5E1;font-size:12px;padding:5px 12px;border-radius:20px}
+  .doc{max-width:960px;margin:0 auto;padding:40px 32px 80px}
+  .section{margin-bottom:56px}
+  .section-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--midblue);font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+  .section-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--navy);margin-bottom:6px;line-height:1.2}
+  .section-body{font-size:14px;color:var(--text2);line-height:1.75;max-width:700px;margin-bottom:24px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px}
+  .card-sm{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:16px 20px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  .swatch-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .swatch{border-radius:var(--rs);overflow:hidden;border:1px solid var(--border)}
+  .swatch-color{height:72px}
+  .swatch-info{padding:10px 12px;background:var(--card)}
+  .swatch-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+  .swatch-hex{font-size:11px;color:var(--text3);font-family:monospace}
+  .swatch-use{font-size:10px;color:var(--text2);margin-top:3px}
+  .type-row{display:flex;align-items:baseline;gap:20px;padding:16px 0;border-bottom:1px solid var(--border)}
+  .type-row:last-child{border-bottom:none}
+  .type-meta{min-width:180px;font-size:11px;color:var(--text3);font-family:monospace}
+  .type-sample{flex:1}
+  .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .comp-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px}
+  .comp-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:16px}
+  .comp-preview{background:var(--surface);border-radius:var(--rs);padding:20px;margin-bottom:16px;display:flex;align-items:center;justify-content:center;min-height:100px}
+  .comp-specs{display:flex;flex-direction:column;gap:6px}
+  .comp-spec-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0}
+  .comp-spec-key{color:var(--text3)}
+  .comp-spec-val{color:var(--text);font-family:monospace;font-size:11px}
+  .mock-btn-primary{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:12px 24px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer}
+  .mock-btn-secondary{background:transparent;color:var(--blue);border:1.5px solid var(--blue);border-radius:10px;padding:11px 24px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer}
+  .mock-btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2);border-radius:10px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
+  .mock-input{width:100%;border:1.5px solid var(--border2);border-radius:10px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--card);outline:none}
+  .mock-pet-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;width:220px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+  .mock-avatar{width:52px;height:52px;border-radius:50%;background:var(--paleblue);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .mock-pet-name{font-size:15px;font-weight:600;color:var(--text)}
+  .mock-pet-breed{font-size:12px;color:var(--text3)}
+  .mock-pet-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px}
+  .badge-green{background:var(--palegreen);color:var(--green)}
+  .badge-amber{background:var(--paleamber);color:var(--amber)}
+  .badge-red{background:var(--palered);color:var(--red)}
+  .badge-blue{background:var(--paleblue);color:var(--blue)}
+  .mock-vaccine-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card)}
+  .mock-vaccine-row:last-child{border-bottom:none}
+  .mock-vac-name{font-size:13px;font-weight:500;color:var(--text)}
+  .mock-vac-date{font-size:11px;color:var(--text3)}
+  .mock-nav{display:flex;justify-content:space-around;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:10px;gap:8px}
+  .mock-nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 14px;border-radius:10px;font-size:10px;color:var(--text3)}
+  .mock-nav-item.active{background:var(--paleblue);color:var(--blue)}
+  .mock-nav-icon{font-size:16px}
+  .mock-fab{width:52px;height:52px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(28,94,168,.35)}
+  .mock-pdf-btn{background:linear-gradient(135deg,#1C5EA8,#0E7490);color:#fff;border:none;border-radius:12px;padding:14px 28px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px}
+  .motion-row{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+  .motion-row:last-child{border-bottom:none}
+  .motion-dot{width:10px;height:10px;border-radius:50%;background:var(--blue);flex-shrink:0}
+  .motion-name{font-size:13px;font-weight:500;color:var(--text);min-width:160px}
+  .motion-val{font-size:12px;font-family:monospace;color:var(--text2)}
+  .motion-use{font-size:12px;color:var(--text3)}
+  .voice-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .voice-card{border-radius:var(--rs);padding:20px}
+  .voice-do{background:var(--palegreen);border:1px solid #BBF7D0}
+  .voice-dont{background:var(--palered);border:1px solid #FECDD3}
+  .voice-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:12px}
+  .do-label{color:var(--green)}
+  .dont-label{color:var(--red)}
+  .voice-item{font-size:13px;margin-bottom:8px;display:flex;gap:8px;align-items:flex-start}
+  .dark-strip{background:#1E293B;border-radius:var(--r);padding:24px 28px}
+  .dark-swatch-row{display:flex;gap:8px;margin-top:12px}
+  .dark-swatch{width:36px;height:36px;border-radius:8px;border:1px solid rgba(255,255,255,.1)}
+  .figma-callout{background:var(--navy);border-radius:var(--r);padding:28px 32px;display:flex;gap:24px;align-items:flex-start}
+  .figma-icon{font-size:32px;flex-shrink:0;margin-top:4px}
+  .figma-title{font-family:'DM Serif Display',serif;font-size:20px;color:#fff;margin-bottom:8px}
+  .figma-body{font-size:13px;color:#94A3B8;line-height:1.7}
+  .figma-chip{display:inline-block;background:rgba(125,211,252,.15);color:#7DD3FC;font-size:11px;padding:3px 10px;border-radius:20px;margin:8px 4px 0 0}
+  .token-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .token-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:16px}
+  .token-name{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:10px}
+  .flow-screen{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:14px;text-align:center}
+  .flow-num{display:inline-block;width:22px;height:22px;border-radius:50%;background:var(--paleblue);color:var(--blue);font-size:11px;font-weight:600;line-height:22px;margin-bottom:8px}
+  .flow-name{font-size:11px;font-weight:500;color:var(--text);margin-bottom:4px}
+  .flow-desc{font-size:10px;color:var(--text3)}
+  .phase-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:16px}
+  .phase-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .phase-badge{background:var(--navy);color:#7DD3FC;font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;white-space:nowrap}
+  .phase-title{font-size:16px;font-weight:600;color:var(--text)}
+  .phase-day{font-size:12px;color:var(--text3)}
+  .checklist{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .checklist li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.5}
+  .checklist li::before{content:'☐';font-size:14px;color:var(--border2);flex-shrink:0;margin-top:1px}
+  .step-divider{height:1px;background:var(--border);margin:16px 0}
+  .step-label{font-size:11px;font-weight:600;color:var(--midblue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+  .impl-note{background:var(--paleblue);border-left:3px solid var(--blue);border-radius:0 var(--rs) var(--rs) 0;padding:10px 14px;font-size:12px;color:var(--blue);margin-top:12px}
+  .stitch-ref{background:#F3F0FF;border:1px solid #DDD6FE;border-radius:var(--rs);padding:8px 12px;font-size:11px;color:#5B21B6;font-family:monospace;margin-top:8px}
+  .decision-table{width:100%;border-collapse:collapse;font-size:13px}
+  .decision-table th{background:var(--navy);color:#E2E8F0;padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+  .decision-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2)}
+  .decision-table tr:last-child td{border-bottom:none}
+  .decision-table tr:nth-child(even) td{background:var(--surface)}
+  .decision-table td:first-child{font-weight:600;color:var(--text)}
+  .decision-table td:nth-child(2){font-family:monospace;color:var(--blue);font-size:12px}
+  .verify-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .verify-item{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:14px;display:flex;gap:10px;align-items:flex-start}
+  .verify-num{width:22px;height:22px;border-radius:50%;background:var(--paleblue);color:var(--blue);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .verify-text{font-size:12px;color:var(--text2);line-height:1.5}
+  .code-block{background:#0F172A;border-radius:var(--rs);padding:16px;font-family:monospace;font-size:12px;color:#7DD3FC;line-height:1.8;margin-top:12px;overflow-x:auto;white-space:pre}
+  .code-comment{color:#475569}
+  .code-cmd{color:#86EFAC}
+  hr.divider{border:none;border-top:1px solid var(--border);margin:48px 0}
+  code{background:var(--surface);padding:1px 5px;border-radius:4px;font-size:11px;font-family:monospace}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">PetAge · Design Brief + Implementation Plan · v1.0</div>
+  <h1 class="hero-title">The Health Passport<br>Every Pet <em>Deserves</em></h1>
+  <p class="hero-sub">Complete design system, component library, screen inventory, and day-by-day implementation checklist. Built from the PRD, TRD, and Stitch design screens. Use this as the single source of truth for building PetAge.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">Web · iOS · Android</span>
+    <span class="hero-tag">Clean &amp; Clinical</span>
+    <span class="hero-tag">Freemium SaaS</span>
+    <span class="hero-tag">18 Screens</span>
+    <span class="hero-tag">Next.js 14 + Expo 51</span>
+    <span class="hero-tag">Firebase + Stripe</span>
+    <span class="hero-tag">14-Day Build</span>
+  </div>
+</div>
+
+<div class="doc">
+
+<!-- TOC -->
+<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;margin-bottom:48px">
+  <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);font-weight:600;margin-bottom:12px">Contents</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 24px">
+    <a href="#brand" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">01 · Brand Essence</a>
+    <a href="#colors" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">02 · Color System</a>
+    <a href="#type" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">03 · Typography</a>
+    <a href="#tokens" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">04 · Spacing &amp; Tokens</a>
+    <a href="#components" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">05 · Components</a>
+    <a href="#screens" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">06 · Screen Inventory</a>
+    <a href="#annotations" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">07 · Screen Annotations</a>
+    <a href="#motion" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">08 · Motion Spec</a>
+    <a href="#voice" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">09 · Brand Voice</a>
+    <a href="#darkmode" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">10 · Dark Mode</a>
+    <a href="#figma" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">11 · Figma Setup</a>
+    <a href="#implementation" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">12 · Implementation Plan</a>
+    <a href="#decisions" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">13 · Design Decisions</a>
+    <a href="#verify" style="font-size:13px;color:var(--blue);text-decoration:none;padding:3px 0">14 · Verification Plan</a>
+  </div>
+</div>
+
+<!-- 01 BRAND -->
+<div class="section" id="brand">
+  <div class="section-label">01 · Brand Essence</div>
+  <h2 class="section-title">What PetAge Feels Like</h2>
+  <p class="section-body">PetAge sits at the intersection of a medical records app and a care companion. The design should feel like Apple Health crossed with a premium consumer brand — trusted, calm, and precise. Never playful, never clinical to the point of cold.</p>
+  <div class="grid3">
+    <div class="card" style="border-top:3px solid var(--blue)"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--midblue);font-weight:600;margin-bottom:10px">Trustworthy</div><div style="font-size:13px;color:var(--text2);line-height:1.7">Clean whitespace, medical-grade precision in data display. Every record feels permanent and retrievable.</div></div>
+    <div class="card" style="border-top:3px solid var(--teal)"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--teal);font-weight:600;margin-bottom:10px">Warm</div><div style="font-size:13px;color:var(--text2);line-height:1.7">Pet photos front and center. Rounded cards. Gentle status colors. The data is clinical; the presentation is human.</div></div>
+    <div class="card" style="border-top:3px solid #7C3AED"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#7C3AED;font-weight:600;margin-bottom:10px">In Control</div><div style="font-size:13px;color:var(--text2);line-height:1.7">Owner-first. Every action is immediate. No waiting for vet approval. The owner owns their data — full stop.</div></div>
+  </div>
+</div>
+
+<!-- 02 COLOR -->
+<div class="section" id="colors">
+  <div class="section-label">02 · Color System</div>
+  <h2 class="section-title">Palette &amp; Semantic Tokens</h2>
+  <p class="section-body">Navy-anchored palette. Clinical blue for primary actions. Teal for premium features. Amber, green, and red for health status only — never decorative.</p>
+  <div class="swatch-grid" style="margin-bottom:24px">
+    <div class="swatch"><div class="swatch-color" style="background:#0B1F3A"></div><div class="swatch-info"><div class="swatch-name">Navy</div><div class="swatch-hex">#0B1F3A</div><div class="swatch-use">Headers, dark surfaces</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#1C5EA8"></div><div class="swatch-info"><div class="swatch-name">Clinical Blue</div><div class="swatch-hex">#1C5EA8</div><div class="swatch-use">Primary CTA, nav active</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#3B82C4"></div><div class="swatch-info"><div class="swatch-name">Mid Blue</div><div class="swatch-hex">#3B82C4</div><div class="swatch-use">Icons, charts, links</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#E8F2FB"></div><div class="swatch-info"><div class="swatch-name">Blue Tint</div><div class="swatch-hex">#E8F2FB</div><div class="swatch-use">Active nav bg</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#0E7490"></div><div class="swatch-info"><div class="swatch-name">Teal</div><div class="swatch-hex">#0E7490</div><div class="swatch-use">Premium badge, PDF CTA</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#15803D"></div><div class="swatch-info"><div class="swatch-name">Status Green</div><div class="swatch-hex">#15803D</div><div class="swatch-use">Vaccine current</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#B45309"></div><div class="swatch-info"><div class="swatch-name">Status Amber</div><div class="swatch-hex">#B45309</div><div class="swatch-use">Due soon, Premium</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#BE123C"></div><div class="swatch-info"><div class="swatch-name">Status Red</div><div class="swatch-hex">#BE123C</div><div class="swatch-use">Overdue, destructive</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#F7F9FC;border-bottom:1px solid var(--border)"></div><div class="swatch-info"><div class="swatch-name">Surface</div><div class="swatch-hex">#F7F9FC</div><div class="swatch-use">App background</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#FFFFFF;border-bottom:1px solid var(--border)"></div><div class="swatch-info"><div class="swatch-name">Card White</div><div class="swatch-hex">#FFFFFF</div><div class="swatch-use">Cards, modals, inputs</div></div></div>
+  </div>
+  <div class="card">
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);font-weight:600;margin-bottom:16px">Status Pills</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+      <span class="mock-pet-badge badge-green" style="font-size:12px;padding:5px 12px">● Current</span>
+      <span class="mock-pet-badge badge-amber" style="font-size:12px;padding:5px 12px">● Due Soon</span>
+      <span class="mock-pet-badge badge-red" style="font-size:12px;padding:5px 12px">● Overdue</span>
+      <span class="mock-pet-badge badge-blue" style="font-size:12px;padding:5px 12px">★ Premium</span>
+      <span style="font-size:12px;background:#EDE9FE;color:#5B21B6;padding:5px 12px;border-radius:20px;font-weight:600">Free</span>
+    </div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--text3)">Pills: 24px height, 6px radius, 500 weight. Never use status colors decoratively.</div>
+  </div>
+</div>
+
+<!-- 03 TYPOGRAPHY -->
+<div class="section" id="type">
+  <div class="section-label">03 · Typography</div>
+  <h2 class="section-title">Type Scale &amp; Hierarchy</h2>
+  <p class="section-body">Web: Inter (Google Fonts). Mobile: SF Pro (iOS) / Roboto (Android) — system defaults. Two weights only: 400 Regular and 600 SemiBold. No 700.</p>
+  <div class="card">
+    <div class="type-row"><div class="type-meta">H1 / 24px / 600<br>Screen titles</div><div class="type-sample" style="font-size:24px;font-weight:600;color:var(--navy)">Vaccine History</div></div>
+    <div class="type-row"><div class="type-meta">H2 / 18px / 600<br>Section headers</div><div class="type-sample" style="font-size:18px;font-weight:600;color:var(--navy)">Recent Vet Visits</div></div>
+    <div class="type-row"><div class="type-meta">Body / 16px / 400<br>Primary content</div><div class="type-sample" style="font-size:16px;color:var(--text)">Rabies vaccine administered March 12 — expires in 11 months.</div></div>
+    <div class="type-row"><div class="type-meta">Body Sm / 14px / 400<br>Secondary content</div><div class="type-sample" style="font-size:14px;color:var(--text2)">Last visit: Frisco Animal Hospital · Dr. Chen · Jan 4, 2025</div></div>
+    <div class="type-row"><div class="type-meta">Caption / 12px / 500<br>Labels, metadata</div><div class="type-sample" style="font-size:12px;font-weight:500;color:var(--text3)">UPDATED 2 DAYS AGO · MICROCHIP #985121012345678</div></div>
+    <div class="type-row"><div class="type-meta">Mono / 13px / 400<br>IDs, dates, codes</div><div class="type-sample" style="font-size:13px;font-family:monospace;color:var(--text2)">Exp: 2026-03-12 · Lot: V4892</div></div>
+  </div>
+</div>
+
+<!-- 04 TOKENS -->
+<div class="section" id="tokens">
+  <div class="section-label">04 · Spacing &amp; Radius Tokens</div>
+  <h2 class="section-title">Layout Tokens</h2>
+  <div class="token-grid">
+    <div class="token-card">
+      <div class="token-name">Border Radius</div>
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px">
+        <div style="width:24px;height:24px;border-radius:4px;background:var(--paleblue);border:1px solid var(--border2)"></div>
+        <div style="width:32px;height:32px;border-radius:8px;background:var(--paleblue);border:1px solid var(--border2)"></div>
+        <div style="width:44px;height:44px;border-radius:12px;background:var(--paleblue);border:1px solid var(--border2)"></div>
+        <div style="width:48px;height:48px;border-radius:16px;background:var(--paleblue);border:1px solid var(--border2)"></div>
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--paleblue);border:1px solid var(--border2)"></div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);font-family:monospace">4 · 8 · 12 · 16 · 50%</div>
+    </div>
+    <div class="token-card">
+      <div class="token-name">Spacing Scale</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:4px;height:8px;background:var(--blue);border-radius:2px"></div><span style="font-size:11px;font-family:monospace;color:var(--text2)">4px — icon gaps</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;background:var(--blue);border-radius:2px"></div><span style="font-size:11px;font-family:monospace;color:var(--text2)">8px — inline gaps</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:16px;height:8px;background:var(--blue);border-radius:2px"></div><span style="font-size:11px;font-family:monospace;color:var(--text2)">16px — card padding</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:24px;height:8px;background:var(--midblue);border-radius:2px"></div><span style="font-size:11px;font-family:monospace;color:var(--text2)">24px — section gap</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:48px;height:8px;background:var(--paleblue);border:1px solid var(--border2);border-radius:2px"></div><span style="font-size:11px;font-family:monospace;color:var(--text2)">48px — page margin</span></div>
+      </div>
+    </div>
+    <div class="token-card">
+      <div class="token-name">Touch Targets</div>
+      <div style="font-size:12px;font-family:monospace;color:var(--text2);display:flex;flex-direction:column;gap:5px">
+        <span>Button: <strong>48px</strong> height</span>
+        <span>FAB: <strong>56×56px</strong></span>
+        <span>Nav item: <strong>44×44px</strong></span>
+        <span>Min tap: <strong>44×44px</strong></span>
+        <span>Input: <strong>48px</strong> height</span>
+        <span>List row: <strong>64px</strong> min</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 05 COMPONENTS -->
+<div class="section" id="components">
+  <div class="section-label">05 · Component Library</div>
+  <h2 class="section-title">Core UI Components</h2>
+  <p class="section-body">0.5px borders throughout. No shadows on cards. 2px Clinical Blue focus ring on all interactive elements. FAB is the only element with a drop shadow.</p>
+  <div class="comp-grid" style="margin-bottom:20px">
+    <div class="comp-card">
+      <div class="comp-label">Buttons</div>
+      <div class="comp-preview" style="flex-direction:column;gap:12px">
+        <button class="mock-btn-primary">Save Record</button>
+        <button class="mock-btn-secondary">View History</button>
+        <button class="mock-btn-ghost">Cancel</button>
+      </div>
+      <div class="comp-specs">
+        <div class="comp-spec-row"><span class="comp-spec-key">Height</span><span class="comp-spec-val">48px, radius 10px</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Primary bg</span><span class="comp-spec-val">#1C5EA8, white text</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Secondary border</span><span class="comp-spec-val">1.5px #1C5EA8</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Disabled</span><span class="comp-spec-val">opacity 0.4</span></div>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-label">Pet Card (Home)</div>
+      <div class="comp-preview">
+        <div class="mock-pet-card">
+          <div class="mock-avatar">🐕</div>
+          <div>
+            <div class="mock-pet-name">Buddy</div>
+            <div class="mock-pet-breed">Golden Retriever · 3y</div>
+            <div style="margin-top:6px"><span class="mock-pet-badge badge-amber">1 due soon</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="comp-specs">
+        <div class="comp-spec-row"><span class="comp-spec-key">Width</span><span class="comp-spec-val">220px scrollable</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Avatar</span><span class="comp-spec-val">52×52px, 50% radius</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Active ring</span><span class="comp-spec-val">2px #1C5EA8 border</span></div>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-label">Record Rows</div>
+      <div class="comp-preview" style="padding:0;flex-direction:column;background:var(--card)">
+        <div class="mock-vaccine-row"><div><div class="mock-vac-name">Rabies</div><div class="mock-vac-date">Mar 12, 2024 · Exp Mar 2026</div></div><span class="mock-pet-badge badge-green">Current</span></div>
+        <div class="mock-vaccine-row"><div><div class="mock-vac-name">Bordetella</div><div class="mock-vac-date">Jun 1, 2024 · Exp Jun 2025</div></div><span class="mock-pet-badge badge-amber">Due Soon</span></div>
+        <div class="mock-vaccine-row"><div><div class="mock-vac-name">DHPP</div><div class="mock-vac-date">Jan 10, 2022 · Exp Jan 2023</div></div><span class="mock-pet-badge badge-red">Overdue</span></div>
+      </div>
+      <div class="comp-specs" style="margin-top:12px">
+        <div class="comp-spec-row"><span class="comp-spec-key">Row height</span><span class="comp-spec-val">64px min</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Swipe</span><span class="comp-spec-val">Left → Edit/Delete</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Sort</span><span class="comp-spec-val">Overdue → Due → Current</span></div>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-label">Bottom Nav (Mobile)</div>
+      <div class="comp-preview" style="flex-direction:column">
+        <div class="mock-nav">
+          <div class="mock-nav-item active"><div class="mock-nav-icon">🏠</div><span>Home</span></div>
+          <div class="mock-nav-item"><div class="mock-nav-icon">💉</div><span>Vaccines</span></div>
+          <div class="mock-nav-item"><div class="mock-nav-icon">📋</div><span>Visits</span></div>
+          <div class="mock-nav-item"><div class="mock-nav-icon">💊</div><span>Meds</span></div>
+          <div class="mock-nav-item"><div class="mock-nav-icon">⚙️</div><span>Settings</span></div>
+        </div>
+      </div>
+      <div class="comp-specs">
+        <div class="comp-spec-row"><span class="comp-spec-key">Height</span><span class="comp-spec-val">64px + safe area</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Active</span><span class="comp-spec-val">#1C5EA8, bg #E8F2FB</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Inactive</span><span class="comp-spec-val">#8896AA</span></div>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-label">FAB + PDF Button</div>
+      <div class="comp-preview" style="gap:20px">
+        <button class="mock-fab">+</button>
+        <button class="mock-pdf-btn">⬇ Export PDF</button>
+      </div>
+      <div class="comp-specs">
+        <div class="comp-spec-row"><span class="comp-spec-key">FAB</span><span class="comp-spec-val">56×56px, 50% radius</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">FAB shadow</span><span class="comp-spec-val">0 4px 16px rgba(28,94,168,.35)</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">PDF gradient</span><span class="comp-spec-val">blue #1C5EA8 → teal #0E7490</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Premium lock</span><span class="comp-spec-val">Lock icon overlay if free</span></div>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-label">Form Inputs</div>
+      <div class="comp-preview" style="flex-direction:column;gap:12px;width:100%">
+        <input class="mock-input" placeholder="Vaccine name (e.g. Rabies, DHPP)">
+        <input class="mock-input" type="date" value="2025-03-14">
+      </div>
+      <div class="comp-specs">
+        <div class="comp-spec-row"><span class="comp-spec-key">Height</span><span class="comp-spec-val">48px, radius 10px</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Border default</span><span class="comp-spec-val">1.5px #C5D0E0</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Border focus</span><span class="comp-spec-val">1.5px #1C5EA8</span></div>
+        <div class="comp-spec-row"><span class="comp-spec-key">Border error</span><span class="comp-spec-val">1.5px #BE123C</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 06 SCREENS -->
+<div class="section" id="screens">
+  <div class="section-label">06 · Screen Inventory</div>
+  <h2 class="section-title">18 Screens to Design</h2>
+  <p class="section-body">Design at 390px (iPhone 15), 375px (iPhone SE), and 1280px (web desktop). Web uses 1100px max-width with left sidebar nav instead of bottom tab bar.</p>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+    <div class="flow-screen" style="border-top:3px solid var(--blue)"><div class="flow-num">1</div><div class="flow-name">Splash</div><div class="flow-desc">Hero + CTA</div></div>
+    <div class="flow-screen" style="border-top:3px solid var(--blue)"><div class="flow-num">2</div><div class="flow-name">Sign Up</div><div class="flow-desc">Email + SSO</div></div>
+    <div class="flow-screen" style="border-top:3px solid var(--blue)"><div class="flow-num">3</div><div class="flow-name">Log In</div><div class="flow-desc">Email + forgot pw</div></div>
+    <div style="grid-column:span 2;background:var(--paleblue);border-radius:var(--rs);padding:14px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--midblue);text-align:center">Auth Flow</div>
+    <div class="flow-screen" style="border-top:3px solid #15803D"><div class="flow-num">4</div><div class="flow-name">Home</div><div class="flow-desc">Pet card scroll</div></div>
+    <div class="flow-screen" style="border-top:3px solid #15803D"><div class="flow-num">5</div><div class="flow-name">Pet Dashboard</div><div class="flow-desc">4-tile actions</div></div>
+    <div class="flow-screen" style="border-top:3px solid #15803D"><div class="flow-num">15</div><div class="flow-name">Add Pet</div><div class="flow-desc">Profile setup</div></div>
+    <div class="flow-screen" style="border-top:3px solid #15803D"><div class="flow-num">16</div><div class="flow-name">Settings</div><div class="flow-desc">Account + notifs</div></div>
+    <div class="flow-screen" style="border-top:3px solid #15803D"><div class="flow-num">18</div><div class="flow-name">Reminder Prefs</div><div class="flow-desc">Push/email toggles</div></div>
+    <div class="flow-screen" style="border-top:3px solid var(--midblue)"><div class="flow-num">6</div><div class="flow-name">Vaccine List</div><div class="flow-desc">Status-sorted</div></div>
+    <div class="flow-screen" style="border-top:3px solid var(--midblue)"><div class="flow-num">7</div><div class="flow-name">Add/Edit Vaccine</div><div class="flow-desc">Form + reminder</div></div>
+    <div class="flow-screen" style="border-top:3px solid var(--midblue)"><div class="flow-num">8</div><div class="flow-name">Vet Visit List</div><div class="flow-desc">Search + filter</div></div>
+    <div class="flow-screen" style="border-top:3px solid var(--midblue)"><div class="flow-num">9</div><div class="flow-name">Add/Edit Visit</div><div class="flow-desc">Form + photo</div></div>
+    <div style="background:transparent"></div>
+    <div class="flow-screen" style="border-top:3px solid var(--teal)"><div class="flow-num">10</div><div class="flow-name">Medication List</div><div class="flow-desc">Active + archived</div></div>
+    <div class="flow-screen" style="border-top:3px solid var(--teal)"><div class="flow-num">11</div><div class="flow-name">Add/Edit Med</div><div class="flow-desc">Generic + dosage</div></div>
+    <div class="flow-screen" style="border-top:3px solid var(--teal)"><div class="flow-num">12</div><div class="flow-name">Weight Timeline</div><div class="flow-desc">Line chart + log</div></div>
+    <div class="flow-screen" style="border-top:3px solid var(--teal)"><div class="flow-num">13</div><div class="flow-name">Add Weight</div><div class="flow-desc">kg/lbs + date</div></div>
+    <div style="background:transparent"></div>
+    <div class="flow-screen" style="border-top:3px solid var(--amber)"><div class="flow-num">14</div><div class="flow-name">Health Report PDF</div><div class="flow-desc">Preview + generate</div></div>
+    <div class="flow-screen" style="border-top:3px solid var(--amber)"><div class="flow-num">17</div><div class="flow-name">Upgrade</div><div class="flow-desc">Feature compare</div></div>
+    <div style="grid-column:span 3;background:var(--paleamber);border-radius:var(--rs);padding:14px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--amber);text-align:center">Premium / Monetization Flow</div>
+  </div>
+</div>
+
+<!-- 07 ANNOTATIONS -->
+<div class="section" id="annotations">
+  <div class="section-label">07 · Key Screen Annotations</div>
+  <h2 class="section-title">Critical Design Notes Per Screen</h2>
+  <div class="grid2">
+    <div class="card-sm"><div style="font-size:12px;font-weight:600;color:var(--blue);margin-bottom:8px">Screen 4 — Home / Pet Cards</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Horizontally scrollable cards, 220px×100px. Last card: "Add Pet" with dashed border. Notification dot on card if any vaccine/med is overdue. Header: "Good morning, [name]."</div><div class="stitch-ref">Stitch: af9f3b2a · Home Dashboard · Desktop 2560×2048</div></div>
+    <div class="card-sm"><div style="font-size:12px;font-weight:600;color:var(--blue);margin-bottom:8px">Screen 5 — Pet Dashboard</div><div style="font-size:12px;color:var(--text2);line-height:1.7">2×2 tile grid (Vaccines, Visits, Meds, Weight). Count badge per tile. Activity feed below (last 3 events). Pet photo full-width header with name/breed/age overlay.</div></div>
+    <div class="card-sm"><div style="font-size:12px;font-weight:600;color:var(--blue);margin-bottom:8px">Screen 6 — Vaccine List</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Sort: Overdue → Due Soon → Current → No Expiry. Red sticky header "Action Required" for overdue group. Empty state: syringe illustration. FAB bottom-right.</div><div class="stitch-ref">Stitch: b4958c10 · Vaccine List · Desktop 2560×2048</div></div>
+    <div class="card-sm"><div style="font-size:12px;font-weight:600;color:var(--blue);margin-bottom:8px">Screen 8 — Vet Visit List</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Searchable, newest-first. Row: date + reason + clinic name. Photo thumbnails inline. Firestore search by date range + keyword.</div><div class="stitch-ref">Stitch: 46e1d80a · Vet Visit List · Desktop 2560×2048</div></div>
+    <div class="card-sm"><div style="font-size:12px;font-weight:600;color:var(--blue);margin-bottom:8px">Screen 10 — Medication List</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Active meds with next-due countdown. "Mark as Given" one-tap from list row. Archive button per row — always dismissable. Archived section collapsible.</div><div class="stitch-ref">Stitch: c0c08d14 (Desktop) + f2cc7a36 (Mobile 780×1822)</div></div>
+    <div class="card-sm"><div style="font-size:12px;font-weight:600;color:var(--teal);margin-bottom:8px">Screen 12 — Weight Timeline</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Recharts LineChart, #3B82C4 line, dot markers, no gridlines. lbs/kg toggle top-right. Log list below. Empty: ghost line + "Log your first weight."</div><div class="stitch-ref">Stitch: ac68675d · Weight Timeline · Desktop 2560×2048</div></div>
+    <div class="card-sm"><div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px">Screen 14 — Health Report PDF</div><div style="font-size:12px;color:var(--text2);line-height:1.7">PDF preview card with slight tilt. Pet photo (circle), name, species, DOB, vaccine table with status. "Generate &amp; Download" uses gradient CTA. Free users see lock overlay.</div></div>
+    <div class="card-sm"><div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px">Screen 17 — Upgrade to Premium</div><div style="font-size:12px;color:var(--text2);line-height:1.7">2-column comparison: Free vs Premium. Navy header on Premium column. Monthly/Annual toggle — annual shows "Save 33%." CTA → Stripe (web) or IAP (mobile). "Restore purchases" link.</div><div class="stitch-ref">Stitch: f579867a · Premium Upgrade · Desktop 2560×2230</div></div>
+  </div>
+</div>
+
+<!-- 08 MOTION -->
+<div class="section" id="motion">
+  <div class="section-label">08 · Motion &amp; Animation</div>
+  <h2 class="section-title">Interaction Timing</h2>
+  <div class="card">
+    <div class="motion-row"><div class="motion-dot"></div><div class="motion-name">Screen transitions</div><div class="motion-val">280ms ease-out</div><div class="motion-use">Slide-up modals, slide-right drill-down</div></div>
+    <div class="motion-row"><div class="motion-dot" style="background:var(--teal)"></div><div class="motion-name">Button press</div><div class="motion-val">scale(0.97) · 100ms</div><div class="motion-use">Scale down on press, spring back</div></div>
+    <div class="motion-row"><div class="motion-dot" style="background:var(--green)"></div><div class="motion-name">Status badge change</div><div class="motion-val">color fade · 300ms</div><div class="motion-use">Smooth transition between states</div></div>
+    <div class="motion-row"><div class="motion-dot" style="background:var(--amber)"></div><div class="motion-name">FAB appearance</div><div class="motion-val">scale(0→1) + fade · 220ms</div><div class="motion-use">Springs in when scroll stops</div></div>
+    <div class="motion-row"><div class="motion-dot" style="background:var(--red)"></div><div class="motion-name">Delete / Archive</div><div class="motion-val">slide-left + fade · 200ms</div><div class="motion-use">Swipe reveal, row collapses on confirm</div></div>
+    <div class="motion-row"><div class="motion-dot" style="background:#7C3AED"></div><div class="motion-name">Chart line draw</div><div class="motion-val">strokeDashoffset · 600ms ease-in-out</div><div class="motion-use">Line draws on first load</div></div>
+  </div>
+</div>
+
+<!-- 09 VOICE -->
+<div class="section" id="voice">
+  <div class="section-label">09 · Microcopy &amp; Brand Voice</div>
+  <h2 class="section-title">How PetAge Writes</h2>
+  <div class="voice-grid">
+    <div class="voice-card voice-do">
+      <div class="voice-label do-label">✓ DO write like this</div>
+      <div class="voice-item"><span style="color:var(--green);font-size:14px">✓</span><span style="font-size:13px;color:#14532D">"Buddy's Rabies vaccine expires in 28 days. Tap to set a reminder."</span></div>
+      <div class="voice-item"><span style="color:var(--green);font-size:14px">✓</span><span style="font-size:13px;color:#14532D">"Record saved. Buddy's health passport is up to date."</span></div>
+      <div class="voice-item"><span style="color:var(--green);font-size:14px">✓</span><span style="font-size:13px;color:#14532D">"No vaccines yet — let's start building Buddy's health record."</span></div>
+      <div class="voice-item"><span style="color:var(--green);font-size:14px">✓</span><span style="font-size:13px;color:#14532D">"Time to give Milo his flea treatment. Mark as given?"</span></div>
+    </div>
+    <div class="voice-card voice-dont">
+      <div class="voice-label dont-label">✗ NEVER write like this</div>
+      <div class="voice-item"><span style="color:var(--red);font-size:14px">✗</span><span style="font-size:13px;color:#881337">"Vaccine expiration notification: 28 days remaining."</span></div>
+      <div class="voice-item"><span style="color:var(--red);font-size:14px">✗</span><span style="font-size:13px;color:#881337">"Record ID #8291 successfully committed to database."</span></div>
+      <div class="voice-item"><span style="color:var(--red);font-size:14px">✗</span><span style="font-size:13px;color:#881337">"No records found. Please add a record to continue."</span></div>
+      <div class="voice-item"><span style="color:var(--red);font-size:14px">✗</span><span style="font-size:13px;color:#881337">"Error 400: Bad request. Please try again."</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 10 DARK MODE -->
+<div class="section" id="darkmode">
+  <div class="section-label">10 · Dark Mode</div>
+  <h2 class="section-title">Dark Mode Tokens</h2>
+  <div class="dark-strip">
+    <div>
+      <div style="font-size:14px;font-weight:600;color:#F1F5F9;margin-bottom:8px">Required for App Store compliance (iOS Dark Mode)</div>
+      <div style="font-size:13px;color:#94A3B8;line-height:1.7">All 18 screens need dark variants. Navy → near-black #0A0F1A. Cards → #1A2335. Primary blue shifts to #3B82C4 (lighter for contrast). Status colors use pastel tints on text, dark surfaces as backgrounds.</div>
+      <div class="dark-swatch-row">
+        <div class="dark-swatch" style="background:#0A0F1A"></div>
+        <div class="dark-swatch" style="background:#1A2335"></div>
+        <div class="dark-swatch" style="background:#243044"></div>
+        <div class="dark-swatch" style="background:#3B82C4"></div>
+        <div class="dark-swatch" style="background:#34D399"></div>
+        <div class="dark-swatch" style="background:#FBBF24"></div>
+        <div class="dark-swatch" style="background:#F87171"></div>
+        <div class="dark-swatch" style="background:#E2E8F0"></div>
+        <div class="dark-swatch" style="background:#94A3B8"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 11 FIGMA -->
+<div class="section" id="figma">
+  <div class="section-label">11 · Figma Setup Instructions</div>
+  <h2 class="section-title">How to Use This Brief in Figma</h2>
+  <div class="figma-callout">
+    <div class="figma-icon">🎨</div>
+    <div>
+      <div class="figma-title">Figma AI Prompt Template</div>
+      <div class="figma-body">Paste this directly into Figma AI to generate correctly-tokenized screens:</div>
+      <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:16px;margin-top:16px;font-size:12px;font-family:monospace;color:#CBD5E1;line-height:1.8">
+        Design a [SCREEN NAME] for PetAge, a pet health records app.<br>
+        Vibe: Clean &amp; clinical, like Apple Health × premium consumer.<br>
+        Primary: #1C5EA8 · Navy: #0B1F3A · Surface: #F7F9FC · Card: #FFFFFF<br>
+        Font: Inter · Weights: 400 + 600 only. No 700 weight.<br>
+        Cards: white, 1px #DDE4EF border, 12px radius, no shadow.<br>
+        Status pills: green #DCFCE7/#15803D · amber #FEF3C7/#B45309 · red #FFE4E6/#BE123C<br>
+        Bottom nav: 64px, active bg #E8F2FB, active icon color #1C5EA8<br>
+        FAB: 56px circle, #1C5EA8, bottom-right, shadow 0 4px 16px rgba(28,94,168,.35)<br>
+        All touch targets ≥ 44×44px. No drop shadows on cards.
+      </div>
+      <div style="margin-top:16px">
+        <span class="figma-chip">Frame: 390×844 (iPhone 15)</span>
+        <span class="figma-chip">Also: 375×667 (SE) and 1280×900 (web)</span>
+        <span class="figma-chip">Auto Layout on every component</span>
+        <span class="figma-chip">Variants: Default / Hover / Active / Disabled</span>
+        <span class="figma-chip">Dark mode variant for all 18 screens</span>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:20px">
+    <div class="grid3">
+      <div class="card-sm"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--midblue);font-weight:600;margin-bottom:10px">Step 1 · Design System</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Set up Color Styles (10 colors + dark variants), Text Styles (6 levels), Effect Styles (FAB shadow only). Name exactly as in this doc.</div></div>
+      <div class="card-sm"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--midblue);font-weight:600;margin-bottom:10px">Step 2 · Build Components</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Order: PetCard → VaccineRow → StatusPill → BottomNav → FAB → PrimaryButton → FormInput. All variants before any screens.</div></div>
+      <div class="card-sm"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--midblue);font-weight:600;margin-bottom:10px">Step 3 · Screen Priority</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Screen 4 → Screen 5 → Screen 6 → Screen 17 → Screen 14. Home + Paywall first — highest conversion impact.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 12 IMPLEMENTATION PLAN -->
+<div class="section" id="implementation">
+  <div class="section-label">12 · Implementation Plan</div>
+  <h2 class="section-title">14-Day Build Checklist</h2>
+  <p class="section-body">Web-first (Next.js 14), then mobile (Expo 51). 4–6 hrs/day. Each phase builds on the last — do not skip ahead. Check off items as you complete them.</p>
+
+  <div class="phase-card">
+    <div class="phase-header"><span class="phase-badge">Day 1</span><div><div class="phase-title">Phase 1 — Foundation &amp; Infrastructure</div><div class="phase-day">Project setup · Firebase · Design system</div></div></div>
+    <div class="step-label">1.1 Project Setup</div>
+    <ul class="checklist">
+      <li>Create Next.js 14: <code>npx create-next-app@14 petage --typescript --tailwind --app</code></li>
+      <li>Initialize shadcn/ui: <code>npx shadcn-ui@latest init</code></li>
+      <li>Install all TRD §3 deps: firebase, zustand, react-hook-form, zod, date-fns, recharts, @react-pdf/renderer, resend, stripe, @stripe/stripe-js, @upstash/ratelimit</li>
+      <li>TypeScript strict mode, ESLint, Prettier config</li>
+      <li>Create <code>.env.local</code> with all 15 env vars from TRD §6</li>
+    </ul>
+    <div class="step-divider"></div>
+    <div class="step-label">1.2 Firebase Setup</div>
+    <ul class="checklist">
+      <li>Create Firebase project → enable Firestore (test mode), Auth (email/password + Google), Storage</li>
+      <li>Download Firebase config → populate env vars · Create service account JSON for Admin SDK</li>
+    </ul>
+    <div class="step-divider"></div>
+    <div class="step-label">1.3 Design System</div>
+    <ul class="checklist">
+      <li>Implement full color palette into Tailwind config (all 10 colors from §02)</li>
+      <li>Configure Inter font (Google Fonts), weights 400/600 only</li>
+      <li>Build base components: Button (3 variants), Input, StatusPill, Card, FAB</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><span class="phase-badge">Days 1–2</span><div><div class="phase-title">Phase 2 — Authentication</div><div class="phase-day">Screens 1–3 · Auth store · Route protection</div></div></div>
+    <ul class="checklist">
+      <li>Create <code>useAuthStore</code> (Zustand): login, logout, user state, tier tracking</li>
+      <li>Firebase Auth email/password sign up + sign in (v9 modular SDK)</li>
+      <li>Google SSO via <code>GoogleAuthProvider</code></li>
+      <li>Create user doc in Firestore <code>users</code> collection on signup (exact TRD §4 schema)</li>
+      <li>Screen 1 (Splash), Screen 2 (Sign Up), Screen 3 (Log In) — react-hook-form + zod validation</li>
+      <li>Next.js middleware: check Firebase JWT on all <code>/app/(dashboard)/*</code> routes</li>
+      <li>Deploy to Vercel — verify auth works in production before continuing</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><span class="phase-badge">Days 2–3</span><div><div class="phase-title">Phase 3 — Home Screen &amp; Pet Profiles</div><div class="phase-day">Screens 4, 5, 15 · /api/pets endpoints</div></div></div>
+    <ul class="checklist">
+      <li>Screen 4 (Home): horizontal scrolling pet cards, "Add Pet" dashed card, bottom nav</li>
+      <li>Screen 5 (Pet Dashboard): photo header, 4 action tiles, activity feed, first-run tooltip</li>
+      <li>Screen 15 (Add Pet): photo → Firebase Storage, all fields per TRD schema</li>
+      <li>Wire <code>/api/pets</code> GET + POST + DELETE with Firestore security rules</li>
+      <li><strong>Enforce 2-pet free limit server-side</strong> — block 3rd pet, show upgrade prompt</li>
+    </ul>
+    <div class="impl-note">Stitch ref: af9f3b2a — PetAge Home Dashboard (Desktop 2560×2048)</div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><span class="phase-badge">Day 3</span><div><div class="phase-title">Phase 4 — Vaccine Tracker</div><div class="phase-day">Screens 6, 7 · Status calc · Reminder toggle</div></div></div>
+    <ul class="checklist">
+      <li>Screen 6 (Vaccine List): desc sort, status badges, red sticky "Action Required" header, FAB</li>
+      <li>Screen 7 (Add/Edit Vaccine): freeform name, date administered, expiry date, reminder toggle (default ON)</li>
+      <li>Status calc via date-fns: <code>current</code> / <code>due_soon</code> / <code>overdue</code></li>
+      <li>Wire <code>/api/vaccines</code> CRUD — composite index: petId + ownerId + dateAdministered DESC</li>
+    </ul>
+    <div class="impl-note">Stitch ref: b4958c10 — PetAge Vaccine List (Desktop 2560×2048)</div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><span class="phase-badge">Day 4</span><div><div class="phase-title">Phase 5 &amp; 6 — Vet Visits + Medications</div><div class="phase-day">Screens 8–11 · Photo upload · Mark as Given</div></div></div>
+    <ul class="checklist">
+      <li>Screen 8 (Vet Visit List): searchable by date range + keyword, newest-first, photo thumbnails</li>
+      <li>Screen 9 (Add/Edit Visit): all fields + <code>&lt;input type="file"&gt;</code> → Firebase Storage signed URL (1hr expiry)</li>
+      <li>Screen 10 (Med List): active meds with next-due countdown, archive button, always dismissable</li>
+      <li>Screen 11 (Add/Edit Med): freeform name (brand OR generic OR OTC), dosage strength, frequency, start date</li>
+      <li>Mark as Given: POST <code>/api/medications/[id]/mark-given</code> → recalculate nextDueDate, reset reminderSent</li>
+    </ul>
+    <div class="impl-note">Stitch ref: 46e1d80a (Visits) · c0c08d14 (Med Desktop) · f2cc7a36 (Med Mobile 780×1822)</div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><span class="phase-badge">Day 5</span><div><div class="phase-title">Phase 7 &amp; 8 — Weight Timeline + Premium</div><div class="phase-day">Screens 12–14, 17 · Recharts · PDF · Stripe</div></div></div>
+    <ul class="checklist">
+      <li>Screen 12 (Weight): Recharts LineChart full-width, #3B82C4, dot markers, no gridlines, lbs/kg toggle</li>
+      <li>Screen 13 (Add Weight): weight input, date picker, notes — stored internally in kg</li>
+      <li>Screen 14 (PDF): @react-pdf/renderer template, Premium gate server + client, lock overlay for free users</li>
+      <li>Screen 17 (Upgrade): Free vs Premium comparison, monthly/annual toggle "Save 33%", Stripe CTA</li>
+      <li>Wire <code>/api/stripe/create-checkout</code> + <code>/api/stripe/webhook</code> + <code>/api/stripe/portal</code></li>
+      <li>Webhook: <code>checkout.session.completed</code> → tier:'premium' · <code>subscription.deleted</code> → tier:'free'</li>
+    </ul>
+    <div class="impl-note">Stitch ref: ac68675d (Weight) · f579867a (Premium Upgrade 2560×2230)</div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><span class="phase-badge">Day 6</span><div><div class="phase-title">Phase 9 — Notifications &amp; Reminders</div><div class="phase-day">Cron job · Expo push · Resend email · Screen 18</div></div></div>
+    <ul class="checklist">
+      <li>Build <code>/api/cron/check-reminders</code>: query vaccines + meds within reminderLeadDays, batch send Expo push + Resend email</li>
+      <li>Add Vercel Cron in <code>vercel.json</code>: <code>"0 9 * * *"</code> daily at 09:00 UTC</li>
+      <li>Screen 18 (Reminder Prefs): push/email toggles per category, lead time selector (7/14/30 days)</li>
+      <li>Upstash Redis rate limiting: register 5/hr, checkout 10/hr, receipt 5/hr, all routes 100/min</li>
+      <li>Test cron manually with CRON_SECRET header — verify push + email delivery</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><span class="phase-badge">Day 7</span><div><div class="phase-title">Phase 10 — Settings, Polish &amp; Security</div><div class="phase-day">Screen 16 · Firestore rules · 7 indexes · Lighthouse</div></div></div>
+    <ul class="checklist">
+      <li>Screen 16 (Settings): account info, subscription status, notification toggles, JSON export, logout, delete account</li>
+      <li>Hard delete: remove all Firestore docs + Firebase Auth account + Storage files</li>
+      <li>Loading skeletons on all list screens + empty state illustrations + error toasts</li>
+      <li>Deploy Firestore security rules: <code>firebase deploy --only firestore:rules</code></li>
+      <li>Create all 7 composite indexes (TRD §9): pets, vaccines×2, vet_visits, medications×2, weight_logs</li>
+      <li>Lighthouse audit — Performance must score &gt; 85</li>
+      <li>Cross-browser: Chrome, Safari, Firefox · Responsive: 375/390/430/768/1280px</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><span class="phase-badge">Days 8–11</span><div><div class="phase-title">Phase 11 — Mobile App (Expo)</div><div class="phase-day">Expo 51 + Expo Router · IAP · Push notifications</div></div></div>
+    <ul class="checklist">
+      <li>Day 8: Create Expo project, install mobile deps (@react-native-firebase/*, expo-notifications, expo-image-picker, expo-in-app-purchases), configure <code>app.json</code> (bundle ID: com.petage.app)</li>
+      <li>Day 8: Port auth store (same Zustand logic) · Register Expo push token via <code>/api/notifications/register-token</code></li>
+      <li>Day 9: Home FlatList, Pet Dashboard 4-tile grid, Vaccine/Visit/Med screens — port from web, mobile UI</li>
+      <li>Day 9: Navigation via expo-router file-based routing (mirrors Next.js structure)</li>
+      <li>Day 10: Weight chart via react-native-svg-charts or victory-native · PDF via @react-pdf/renderer + expo-sharing</li>
+      <li>Day 10: IAP via expo-in-app-purchases + <code>/api/iap/validate-receipt</code> · Test in Sandbox mode</li>
+      <li>Day 11: Push notification tap handler → navigate to correct screen · Full E2E test on physical device</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><span class="phase-badge">Days 12–14</span><div><div class="phase-title">Phase 12 — QA &amp; App Store Submission</div><div class="phase-day">Bug fixes · EAS Build · TestFlight · Review</div></div></div>
+    <ul class="checklist">
+      <li>Day 12: Fix all bugs from Day 11. Test on iPhone SE (375px) + mid-range Android (360px)</li>
+      <li>Day 13: <code>eas build --platform ios --profile production</code> → submit to TestFlight</li>
+      <li>Day 13: <code>eas build --platform android --profile production</code> → Play Store internal testing</li>
+      <li>Day 14: Write App Store listing copy from PRD competitive analysis</li>
+      <li>Day 14: Keywords: "VitusVet alternative", "pet vaccine tracker", "pet health records"</li>
+      <li>Day 14: Submit both iOS + Android for store review</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 13 DECISIONS -->
+<div class="section" id="decisions">
+  <div class="section-label">13 · Critical Design Decisions</div>
+  <h2 class="section-title">Why We Made These Choices</h2>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="decision-table">
+      <thead><tr><th>Decision</th><th>Choice</th><th>Rationale</th></tr></thead>
+      <tbody>
+        <tr><td>Build order</td><td>Web first</td><td>Faster iteration; shared API means mobile is a UI port, not a rebuild</td></tr>
+        <tr><td>Database</td><td>Firebase Spark</td><td>$0/month for 1,000 users; 50k reads/day + 20k writes/day is enough</td></tr>
+        <tr><td>PDF</td><td>@react-pdf/renderer</td><td>Client-side; no Lambda cost; generates as browser blob</td></tr>
+        <tr><td>Data ownership</td><td>Firestore: uid == ownerId</td><td>Owner-first enforced at DB level — cannot be bypassed via API</td></tr>
+        <tr><td>Paywall</td><td>Soft (prompt, not hard block)</td><td>Better UX; user explores before hitting gate; reduces day-1 bounce</td></tr>
+        <tr><td>Medication fields</td><td>Freeform + dosageStrength</td><td>Fixes Pawprint's #1 complaint — accepts generic, OTC, any name</td></tr>
+        <tr><td>Reminder dismiss</td><td>Archive + snooze always available</td><td>Fixes Pawprint's undismissable reminder failure — owner controls all</td></tr>
+        <tr><td>Email</td><td>Resend</td><td>3,000 free/month; simplest API; reliable deliverability</td></tr>
+        <tr><td>Rate limiting</td><td>Upstash Redis</td><td>10,000 commands/day free; @upstash/ratelimit is AI-tool friendly</td></tr>
+        <tr><td>State management</td><td>Zustand</td><td>Same store logic shared across web + mobile; no Provider wrapping</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 14 VERIFICATION -->
+<div class="section" id="verify">
+  <div class="section-label">14 · Verification Plan</div>
+  <h2 class="section-title">Manual Verification Checklist</h2>
+  <p class="section-body">Run all 12 checks in production — not localhost, not staging. Every check must pass before App Store submission.</p>
+  <div class="verify-grid" style="margin-bottom:24px">
+    <div class="verify-item"><div class="verify-num">1</div><div class="verify-text"><strong>Auth:</strong> Sign up → sign in → Google SSO → logout → forgot password — all paths work on petage.app</div></div>
+    <div class="verify-item"><div class="verify-num">2</div><div class="verify-text"><strong>Pet CRUD:</strong> Add 2 pets (free), attempt 3rd → upgrade prompt. Delete pet → list updates.</div></div>
+    <div class="verify-item"><div class="verify-num">3</div><div class="verify-text"><strong>Vaccine:</strong> Add → verify status badge → edit expiry to past → confirm badge changes to "Overdue"</div></div>
+    <div class="verify-item"><div class="verify-num">4</div><div class="verify-text"><strong>Vet visit:</strong> Add with 10MB photo → signed URL loads within 5 seconds</div></div>
+    <div class="verify-item"><div class="verify-num">5</div><div class="verify-text"><strong>Medication:</strong> Add daily med → mark as given → verify nextDueDate = today + 1 day in Firestore</div></div>
+    <div class="verify-item"><div class="verify-num">6</div><div class="verify-text"><strong>Weight:</strong> Log 5 entries → chart renders → toggle lbs/kg → values convert correctly</div></div>
+    <div class="verify-item"><div class="verify-num">7</div><div class="verify-text"><strong>PDF gate:</strong> Free user sees lock overlay. Premium user downloads PDF with correct data.</div></div>
+    <div class="verify-item"><div class="verify-num">8</div><div class="verify-text"><strong>Stripe:</strong> Complete checkout → tier = 'premium' in Firestore → cancel → tier reverts to 'free'</div></div>
+    <div class="verify-item"><div class="verify-num">9</div><div class="verify-text"><strong>Notifications:</strong> Hit cron manually → Expo push received on device + Resend log shows sent</div></div>
+    <div class="verify-item"><div class="verify-num">10</div><div class="verify-text"><strong>Security:</strong> User B cannot read User A's pets — direct Firestore query returns permission-denied</div></div>
+    <div class="verify-item"><div class="verify-num">11</div><div class="verify-text"><strong>Responsive:</strong> Layout correct at 375 / 390 / 430 / 768 / 1280px — no overflow, no clipped text</div></div>
+    <div class="verify-item"><div class="verify-num">12</div><div class="verify-text"><strong>Crash-free:</strong> Sentry / Crashlytics shows &gt; 99% crash-free on first 100 sessions</div></div>
+  </div>
+  <h3 style="font-size:16px;font-weight:600;color:var(--navy);margin-bottom:12px">Security Verification Commands</h3>
+  <div class="code-block"><span class="code-comment"># 2-pet server-side limit — must return 403</span>
+<span class="code-cmd">curl -X POST /api/pets -H "Authorization: Bearer {free_token}" -d '{"name":"Pet3"}'</span>
+
+<span class="code-comment"># PDF premium gate — must return 403</span>
+<span class="code-cmd">curl /api/pdf/generate?petId=xxx -H "Authorization: Bearer {free_token}"</span>
+
+<span class="code-comment"># Rate limit — 6th request must return 429</span>
+<span class="code-cmd">for i in {1..6}; do curl -X POST /api/auth/register -d '...'; done</span>
+
+<span class="code-comment"># Stripe webhook test</span>
+<span class="code-cmd">stripe listen --forward-to localhost:3000/api/stripe/webhook</span>
+<span class="code-cmd">stripe trigger checkout.session.completed</span>
+
+<span class="code-comment"># Lighthouse audit</span>
+<span class="code-cmd">npx lighthouse https://petage.app --output html --output-path ./audit.html</span></div>
+</div>
+
+<hr class="divider">
+<div style="text-align:center;padding:20px 0 40px">
+  <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy);margin-bottom:8px">PetAge · Design Brief + Implementation Plan · v1.0</div>
+  <div style="font-size:13px;color:var(--text3);margin-bottom:16px">14 sections · 18 screens · Full color, type, component, motion, and build spec</div>
+  <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap">
+    <span style="background:var(--paleblue);color:var(--blue);font-size:12px;padding:5px 14px;border-radius:20px">Next.js 14 + Expo 51</span>
+    <span style="background:var(--palegreen);color:var(--green);font-size:12px;padding:5px 14px;border-radius:20px">Firebase Spark — free</span>
+    <span style="background:var(--paleamber);color:var(--amber);font-size:12px;padding:5px 14px;border-radius:20px">Stripe + Apple IAP</span>
+    <span style="background:#EDE9FE;color:#5B21B6;font-size:12px;padding:5px 14px;border-radius:20px">$0/month · 1,000 users</span>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

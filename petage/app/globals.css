@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================
+   PetAge Design System — globals
+   Design Brief v1.0 source of truth
+   =========================== */
+
+@layer base {
+  :root {
+    /* Light mode surfaces */
+    --background: #F7F9FC;
+    --foreground: #1A2540;
+    --card: #FFFFFF;
+    --border: #DDE4EF;
+    --border-strong: #C5D0E0;
+  }
+
+  .dark {
+    --background: #0A0F1A;
+    --foreground: #E2E8F0;
+    --card: #1A2335;
+    --border: #243044;
+    --border-strong: #334155;
+  }
+
+  body {
+    color: var(--foreground);
+    background: var(--background);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Status pills — never used decoratively */
+  .pill {
+    @apply inline-flex items-center gap-1 px-3 py-0.5 rounded-[6px] text-caption font-medium;
+  }
+  .pill-green {
+    @apply bg-pale-green text-status-green;
+  }
+  .pill-amber {
+    @apply bg-pale-amber text-status-amber;
+  }
+  .pill-red {
+    @apply bg-pale-red text-status-red;
+  }
+  .pill-blue {
+    @apply bg-blue-tint text-clinical-blue;
+  }
+}
+
+@layer components {
+  /* Cards — 0.5px borders, no shadow (Design Brief §05) */
+  .card {
+    @apply bg-card border border-border rounded-md;
+  }
+
+  /* Touch targets — min 44x44 per Apple HIG */
+  .touch-target {
+    @apply min-w-[44px] min-h-[44px];
+  }
+
+  /* FAB — Only element with shadow */
+  .fab {
+    @apply w-14 h-14 rounded-full bg-clinical-blue text-white
+           flex items-center justify-center
+           shadow-fab hover:brightness-110
+           active:scale-[0.97] transition-transform duration-100
+           text-[22px] cursor-pointer;
+  }
+
+  /* Record rows — 64px min height */
+  .record-row {
+    @apply flex items-center justify-between px-4 py-3
+           min-h-[64px] border-b border-border bg-card;
+  }
+  .record-row:last-child {
+    @apply border-b-0;
+  }
+
+  /* Section label */
+  .section-label {
+    @apply text-[10px] tracking-[0.14em] uppercase text-mid-blue font-semibold
+           flex items-center gap-2;
+  }
+  .section-label::after {
+    content: "";
+    @apply flex-1 h-px bg-border;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
