@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/lib/store/authStore";
 import BottomNav from "@/components/ui/BottomNav";
 
@@ -14,13 +14,18 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { user, loading } = useAuthStore();
+  const { user, firebaseUser, loading, logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !firebaseUser) {
       router.push("/login");
     }
-  }, [user, loading, router]);
+  }, [firebaseUser, loading, router]);
 
   // Loading state
   if (loading) {
@@ -35,7 +40,11 @@ export default function DashboardLayout({
   }
 
   // Not authenticated
-  if (!user) return null;
+  if (!firebaseUser) return null;
+
+  // Use Firestore user data if available, fall back to Firebase Auth data
+  const displayEmail = user?.email ?? firebaseUser.email ?? "";
+  const displayTier = user?.tier ?? "free";
 
   return (
     <div className="min-h-screen bg-surface">
@@ -63,16 +72,22 @@ export default function DashboardLayout({
           <SidebarLink href="/dashboard/settings" icon="⚙️" label="Settings" />
           <div className="px-3 py-2 mt-2">
             <p className="text-[12px] text-text-tertiary truncate">
-              {user.email}
+              {displayEmail}
             </p>
-            <div className="mt-1">
+            <div className="mt-1 flex items-center justify-between">
               <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                user.tier === "premium"
+                displayTier === "premium"
                   ? "bg-pale-amber text-status-amber"
                   : "bg-[#EDE9FE] text-[#5B21B6]"
               }`}>
-                {user.tier === "premium" ? "★ Premium" : "Free"}
+                {displayTier === "premium" ? "★ Premium" : "Free"}
               </span>
+              <button
+                onClick={handleLogout}
+                className="text-[11px] text-text-tertiary hover:text-status-red transition-colors duration-150"
+              >
+                Sign out
+              </button>
             </div>
           </div>
         </div>
@@ -99,14 +114,23 @@ function SidebarLink({
   icon: string;
   label: string;
 }) {
-  // We'll use window.location for now since usePathname needs separate import
+  const pathname = usePathname();
+  const isActive =
+    href === "/dashboard"
+      ? pathname === "/dashboard"
+      : pathname.startsWith(href);
+
   return (
     <a
       href={href}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] text-text-secondary hover:bg-blue-tint hover:text-clinical-blue transition-colors duration-150"
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] transition-colors duration-150 ${
+        isActive
+          ? "bg-blue-tint text-clinical-blue font-semibold"
+          : "text-text-secondary hover:bg-blue-tint hover:text-clinical-blue font-medium"
+      }`}
     >
       <span className="text-[16px] w-5 text-center">{icon}</span>
-      <span className="font-medium">{label}</span>
+      <span>{label}</span>
     </a>
   );
 }

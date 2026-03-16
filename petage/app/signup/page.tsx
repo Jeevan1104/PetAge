@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/lib/store/authStore";
@@ -11,28 +11,34 @@ import { SignUpForm, SignUpFormData } from "@/components/auth/AuthForms";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const { user, loading, error, signUp, signInWithGoogle, clearError } = useAuthStore();
+  const { firebaseUser, loading, error, signUp, signInWithGoogle, clearError } = useAuthStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user && !loading) {
+    if (firebaseUser && !loading) {
       router.push("/dashboard");
     }
-  }, [user, loading, router]);
+  }, [firebaseUser, loading, router]);
 
   useEffect(() => {
     clearError();
   }, [clearError]);
 
   const handleSubmit = async (data: SignUpFormData) => {
-    await signUp(data.email, data.password, data.displayName);
+    setIsSubmitting(true);
+    try {
+      await signUp(data.email, data.password, data.displayName);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleGoogleSignIn = async () => {
     await signInWithGoogle();
   };
 
-  if (user) return null;
+  if (firebaseUser) return null;
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row">
@@ -88,7 +94,7 @@ export default function SignUpPage() {
           <SignUpForm
             onSubmit={handleSubmit}
             onGoogleSignIn={handleGoogleSignIn}
-            loading={loading}
+            loading={isSubmitting}
             error={error}
           />
 

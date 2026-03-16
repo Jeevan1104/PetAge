@@ -45,6 +45,38 @@ interface UserCreateData {
   updatedAt: FieldValue;
 }
 
+function getAuthErrorMessage(err: unknown): string {
+  const code = (err as { code?: string })?.code;
+  switch (code) {
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+    case "auth/user-not-found":
+      return "Incorrect email or password. Please try again.";
+    case "auth/email-already-in-use":
+      return "An account with this email already exists.";
+    case "auth/weak-password":
+      return "Password must be at least 6 characters.";
+    case "auth/invalid-email":
+      return "Please enter a valid email address.";
+    case "auth/user-disabled":
+      return "This account has been disabled. Contact support.";
+    case "auth/too-many-requests":
+      return "Too many failed attempts. Please wait a few minutes and try again.";
+    case "auth/operation-not-allowed":
+      return "This sign-in method is not enabled. Please contact support.";
+    case "auth/popup-blocked":
+      return "Popup was blocked by your browser. Please allow popups for this site.";
+    case "auth/popup-closed-by-user":
+      return "Sign-in was cancelled.";
+    case "auth/network-request-failed":
+      return "Network error. Please check your internet connection.";
+    case "auth/configuration-not-found":
+      return "Authentication is not configured. Please contact support.";
+    default:
+      return err instanceof Error ? err.message : "An unexpected error occurred.";
+  }
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   firebaseUser: null,
@@ -53,10 +85,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signUp: async (email, password, displayName) => {
     try {
-      set({ loading: true, error: null });
+      set({ error: null });
       const { user: fbUser } = await createUserWithEmailAndPassword(auth, email, password);
 
-      // Create user document in Firestore (TRD §4 schema)
+      // Create user doc in Firestore — best effort, don't block auth
       const userData: UserCreateData = {
         uid: fbUser.uid,
         email: fbUser.email!,
@@ -69,57 +101,56 @@ export const useAuthStore = create<AuthState>((set) => ({
         updatedAt: serverTimestamp(),
       };
 
-      await setDoc(doc(db, "users", fbUser.uid), userData);
-
-      set({
-        firebaseUser: fbUser,
-        user: userData as unknown as User,
-        loading: false,
-      });
+      try {
+        await setDoc(doc(db, "users", fbUser.uid), userData);
+        set({ firebaseUser: fbUser, user: userData as unknown as User });
+      } catch {
+        set({ firebaseUser: fbUser });
+      }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Sign up failed";
-      set({ error: message, loading: false });
+      set({ error: getAuthErrorMessage(err) });
     }
   },
 
   signIn: async (email, password) => {
     try {
-      set({ loading: true, error: null });
+      set({ error: null });
       await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged will handle user state
+      // onAuthStateChanged handles the rest
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Sign in failed";
-      set({ error: message, loading: false });
+      set({ error: getAuthErrorMessage(err) });
     }
   },
 
   signInWithGoogle: async () => {
     try {
-      set({ loading: true, error: null });
+      set({ error: null });
       const { user: fbUser } = await signInWithPopup(auth, googleProvider);
 
-      // Check if user doc exists, create if not
-      const userRef = doc(db, "users", fbUser.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        const userData: UserCreateData = {
-          uid: fbUser.uid,
-          email: fbUser.email || "",
-          displayName: fbUser.displayName || "",
-          photoURL: fbUser.photoURL || "",
-          tier: "free",
-          notifPush: true,
-          notifEmail: true,
-          reminderLeadDays: 30,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        };
-        await setDoc(userRef, userData);
+      // Create user doc if first sign-in — best effort
+      try {
+        const userRef = doc(db, "users", fbUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) {
+          const userData: UserCreateData = {
+            uid: fbUser.uid,
+            email: fbUser.email || "",
+            displayName: fbUser.displayName || "",
+            photoURL: fbUser.photoURL || undefined,
+            tier: "free",
+            notifPush: true,
+            notifEmail: true,
+            reminderLeadDays: 30,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          };
+          await setDoc(userRef, userData);
+        }
+      } catch {
+        // Firestore unavailable — onAuthStateChanged will handle user state
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Google sign in failed";
-      set({ error: message, loading: false });
+      set({ error: getAuthErrorMessage(err) });
     }
   },
 
@@ -128,8 +159,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await signOut(auth);
       set({ user: null, firebaseUser: null });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Logout failed";
-      set({ error: message });
+      set({ error: getAuthErrorMessage(err) });
     }
   },
 
@@ -138,20 +168,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   initAuth: () => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
-        // Fetch user data from Firestore
+        // Unblock the app immediately — don't wait for Firestore
+        set({ firebaseUser: fbUser, loading: false });
+
+        // Load Firestore user doc in background (tier, preferences, etc.)
         try {
           const userSnap = await getDoc(doc(db, "users", fbUser.uid));
           if (userSnap.exists()) {
-            set({
-              firebaseUser: fbUser,
-              user: userSnap.data() as User,
-              loading: false,
-            });
-          } else {
-            set({ firebaseUser: fbUser, loading: false });
+            set({ user: userSnap.data() as User });
           }
         } catch {
-          set({ firebaseUser: fbUser, loading: false });
+          // Firestore unavailable — app works, just without stored preferences
         }
       } else {
         set({ user: null, firebaseUser: null, loading: false });
