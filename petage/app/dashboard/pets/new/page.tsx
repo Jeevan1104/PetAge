@@ -11,7 +11,7 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
-import { storage, auth } from "@/lib/firebase";
+import { getStorage, getAuth } from "@/lib/firebase";
 import { usePetStore } from "@/lib/store/petStore";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -34,11 +34,11 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 async function uploadPetPhoto(file: File): Promise<string> {
-  const userId = auth.currentUser?.uid;
+  const userId = getAuth().currentUser?.uid;
   if (!userId) throw new Error("Not authenticated");
   const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
   const path = `pets/${userId}/${Date.now()}_${safeName}`;
-  const ref = storageRef(storage, path);
+  const ref = storageRef(getStorage(), path);
   const snap = await uploadBytes(ref, file);
   return getDownloadURL(snap.ref);
 }

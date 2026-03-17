@@ -6,7 +6,7 @@ import {
   onSnapshot,
   orderBy,
 } from "firebase/firestore";
-import { db, auth } from "@/lib/firebase";
+import { getDb, getAuth } from "@/lib/firebase";
 import type { Pet } from "@/lib/types";
 
 interface CreatePetData {
@@ -33,7 +33,7 @@ interface PetState {
 }
 
 async function getToken(): Promise<string> {
-  const user = auth.currentUser;
+  const user = getAuth().currentUser;
   if (!user) throw new Error("Not authenticated");
   return user.getIdToken();
 }
@@ -50,7 +50,7 @@ export const usePetStore = create<PetState>((set) => ({
     set({ loading: true });
 
     const q = query(
-      collection(db, "pets"),
+      collection(getDb(), "pets"),
       where("ownerId", "==", userId),
       where("isArchived", "==", false),
       orderBy("createdAt", "asc")

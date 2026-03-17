@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { doc, onSnapshot } from "firebase/firestore";
 import { differenceInYears, differenceInMonths } from "date-fns";
 import Image from "next/image";
-import { db } from "@/lib/firebase";
+import { getDb } from "@/lib/firebase";
 import { usePetStore } from "@/lib/store/petStore";
 import type { Pet } from "@/lib/types";
 
@@ -80,7 +80,7 @@ export default function PetDashboardPage() {
 
   useEffect(() => {
     if (!petId) return;
-    const ref = doc(db, "pets", petId);
+    const ref = doc(getDb(), "pets", petId);
     const unsub = onSnapshot(ref, (snap) => {
       if (snap.exists()) {
         setPet({ petId: snap.id, ...snap.data() } as Pet);

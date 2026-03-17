@@ -1,137 +1,101 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { differenceInYears, differenceInMonths } from "date-fns";
 import { useAuthStore } from "@/lib/store/authStore";
 import { usePetStore } from "@/lib/store/petStore";
 import { PetCard, AddPetCard } from "@/components/ui/PetCard";
-import type { Pet } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
-function getGreeting(displayName?: string): string {
-  const hour = new Date().getHours();
-  const time =
-    hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
-  const firstName = displayName?.split(" ")[0];
-  return `Good ${time}${firstName ? `, ${firstName}` : ""}`;
-}
-
-function formatPetAge(dateOfBirth: Pet["dateOfBirth"]): string | undefined {
-  if (!dateOfBirth) return undefined;
-
-  let date: Date;
-  if (
-    typeof dateOfBirth === "object" &&
-    "toDate" in (dateOfBirth as unknown as Record<string, unknown>)
-  ) {
-    date = (dateOfBirth as unknown as { toDate: () => Date }).toDate();
-  } else {
-    return undefined;
-  }
-
-  const years = differenceInYears(new Date(), date);
-  if (years >= 1) return `${years}y`;
-  const months = differenceInMonths(new Date(), date);
-  if (months > 0) return `${months}mo`;
-  return "< 1mo";
-}
+// Screen 4 — Home Dashboard
+// Stitch ref: af9f3b2a
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { pets, loading, subscribeToUserPets } = usePetStore();
+  const { pets, subscribeToUserPets, setActivePet, activePetId } = usePetStore();
 
   useEffect(() => {
-    if (!user?.uid) return;
-    const unsubscribe = subscribeToUserPets(user.uid);
-    return unsubscribe;
+    if (user?.uid) {
+      const unsubscribe = subscribeToUserPets(user.uid);
+      return () => unsubscribe();
+    }
   }, [user?.uid, subscribeToUserPets]);
 
-  return (
-    <div className="px-6 md:px-10 py-8 animate-fade-in">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-h1 text-navy">
-          {getGreeting(user?.displayName ?? undefined)}
-        </h1>
-        <p className="text-body-sm text-text-secondary mt-1">
-          {pets.length > 0
-            ? `${pets.length} pet${pets.length > 1 ? "s" : ""} in your care`
-            : "Start building your pet's health passport"}
-        </p>
-      </div>
+  const handlePetClick = (petId: string) => {
+    setActivePet(petId);
+    router.push(`/dashboard/pets/${petId}`);
+  };
 
-      {/* Pet Cards row */}
-      {loading ? (
-        <div className="flex gap-4">
-          {[0, 1].map((i) => (
-            <div
-              key={i}
-              className="w-[220px] h-[100px] bg-border rounded-lg animate-pulse shrink-0"
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-6 px-6 md:-mx-10 md:px-10">
+  const handleAddPet = () => {
+    // Check limit on client for better UX (actual check is server-side)
+    if (user?.tier === "free" && pets.length >= 2) {
+      router.push("/dashboard/premium?reason=limit_reached");
+      return;
+    }
+    router.push("/dashboard/pets/new");
+  };
+
+  return (
+    <div className="px-6 md:px-10 py-8">
+      {/* Header */}
+      <header className="mb-10">
+        <h1 className="text-h1 text-navy mb-1">
+          Good morning, {user?.displayName || "Pet Owner"} 👋
+        </h1>
+        <p className="text-body-sm text-text-secondary">
+          Your pets&apos; health records are up to date.
+        </p>
+      </header>
+
+      {/* Pet Horizontal List */}
+      <section className="mb-12">
+        <div className="section-label mb-4">My Pets</div>
+        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
           {pets.map((pet) => (
             <PetCard
               key={pet.petId}
               name={pet.name}
               breed={pet.breed}
-              age={formatPetAge(pet.dateOfBirth)}
               species={pet.species}
-              photoURL={pet.photoURL ?? undefined}
-              isActive={false}
-              onClick={() => router.push(`/dashboard/pets/${pet.petId}`)}
+              photoURL={pet.photoURL}
+              isActive={activePetId === pet.petId}
+              onClick={() => handlePetClick(pet.petId)}
+              // alertCount and alertType would come from real calculations in Phase 4-6
+              alertCount={0} 
             />
           ))}
-          <AddPetCard onClick={() => router.push("/dashboard/pets/new")} />
+          <AddPetCard onClick={handleAddPet} />
         </div>
-      )}
+      </section>
 
-      {/* Empty state */}
-      {!loading && pets.length === 0 && (
-        <div className="mt-8 card p-10 flex flex-col items-center text-center">
-          <span className="text-5xl mb-4">🐾</span>
-          <h2 className="text-h2 text-navy mb-2">Add your first pet</h2>
-          <p className="text-body-sm text-text-secondary max-w-[280px] mb-6">
-            Track vaccines, vet visits, medications and weight — all in one
-            place.
-          </p>
-          <button
-            onClick={() => router.push("/dashboard/pets/new")}
-            className="px-6 py-3 bg-clinical-blue text-white rounded-[10px] text-[14px] font-semibold hover:brightness-110 active:scale-[0.97] transition-all"
-          >
-            Add pet
-          </button>
-        </div>
-      )}
-
-      {/* Quick-access tiles — only when pets exist */}
-      {!loading && pets.length > 0 && (
-        <div className="mt-8">
-          <p className="section-label mb-4">Quick access</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { icon: "💉", label: "Vaccines", href: "/dashboard/vaccines" },
-              { icon: "📋", label: "Vet Visits", href: "/dashboard/visits" },
-              { icon: "💊", label: "Medications", href: "/dashboard/meds" },
-              { icon: "⚖️", label: "Weight", href: "/dashboard/weight" },
-            ].map((tile) => (
-              <a
-                key={tile.label}
-                href={tile.href}
-                className="card p-4 flex flex-col items-center gap-2 hover:border-mid-blue active:scale-[0.97] transition-all duration-100 cursor-pointer"
-              >
-                <span className="text-[28px]">{tile.icon}</span>
-                <span className="text-[13px] font-medium text-text-secondary">
-                  {tile.label}
-                </span>
-              </a>
-            ))}
+      {/* Quick Summary or Activity Feed */}
+      <section className="grid md:grid-cols-2 gap-8">
+        <div>
+          <div className="section-label mb-4">Upcoming Reminders</div>
+          <div className="card p-8 flex flex-col items-center justify-center text-center min-h-[160px]">
+             <span className="text-2xl mb-2">✨</span>
+             <p className="text-body-sm text-text-tertiary">All caught up! No reminders for the next 7 days.</p>
           </div>
         </div>
-      )}
+
+        <div>
+          <div className="section-label mb-4">Recent Activity</div>
+           <div className="card overflow-hidden">
+             {pets.length === 0 ? (
+               <div className="p-8 text-center">
+                 <p className="text-body-sm text-text-tertiary">No activity yet. Add a pet to get started.</p>
+               </div>
+             ) : (
+               <div className="divide-y divide-border">
+                 {/* This would be populated from a real activity collection later */}
+                 <div className="px-4 py-3 text-[13px] text-text-secondary">
+                    Welcome to PetAge! Start by adding your pet&apos;s records.
+                 </div>
+               </div>
+             )}
+           </div>
+        </div>
+      </section>
     </div>
   );
 }

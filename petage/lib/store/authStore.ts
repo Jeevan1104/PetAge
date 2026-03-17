@@ -14,7 +14,7 @@ import {
   serverTimestamp,
   FieldValue,
 } from "firebase/firestore";
-import { auth, db, googleProvider } from "@/lib/firebase";
+import { getAuth, getDb, getGoogleProvider } from "@/lib/firebase";
 import { User } from "@/lib/types";
 
 interface AuthState {
@@ -86,7 +86,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   signUp: async (email, password, displayName) => {
     try {
       set({ error: null });
-      const { user: fbUser } = await createUserWithEmailAndPassword(auth, email, password);
+      const { user: fbUser } = await createUserWithEmailAndPassword(getAuth(), email, password);
 
       // Create user doc in Firestore — best effort, don't block auth
       const userData: UserCreateData = {
@@ -102,7 +102,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       };
 
       try {
-        await setDoc(doc(db, "users", fbUser.uid), userData);
+        await setDoc(doc(getDb(), "users", fbUser.uid), userData);
         set({ firebaseUser: fbUser, user: userData as unknown as User });
       } catch {
         set({ firebaseUser: fbUser });
@@ -115,7 +115,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   signIn: async (email, password) => {
     try {
       set({ error: null });
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(getAuth(), email, password);
       // onAuthStateChanged handles the rest
     } catch (err: unknown) {
       set({ error: getAuthErrorMessage(err) });
@@ -125,11 +125,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   signInWithGoogle: async () => {
     try {
       set({ error: null });
-      const { user: fbUser } = await signInWithPopup(auth, googleProvider);
+      const { user: fbUser } = await signInWithPopup(getAuth(), getGoogleProvider());
 
       // Create user doc if first sign-in — best effort
       try {
-        const userRef = doc(db, "users", fbUser.uid);
+        const userRef = doc(getDb(), "users", fbUser.uid);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) {
           const userData: UserCreateData = {
@@ -156,7 +156,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     try {
-      await signOut(auth);
+      await signOut(getAuth());
       set({ user: null, firebaseUser: null });
     } catch (err: unknown) {
       set({ error: getAuthErrorMessage(err) });
@@ -166,14 +166,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   clearError: () => set({ error: null }),
 
   initAuth: () => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+    const unsubscribe = onAuthStateChanged(getAuth(), async (fbUser) => {
       if (fbUser) {
         // Unblock the app immediately — don't wait for Firestore
         set({ firebaseUser: fbUser, loading: false });
 
         // Load Firestore user doc in background (tier, preferences, etc.)
         try {
-          const userSnap = await getDoc(doc(db, "users", fbUser.uid));
+          const userSnap = await getDoc(doc(getDb(), "users", fbUser.uid));
           if (userSnap.exists()) {
             set({ user: userSnap.data() as User });
           }
