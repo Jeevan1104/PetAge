@@ -205,7 +205,7 @@ export default function WeightPage() {
           <div className="text-center py-16">
             <div className="w-16 h-16 bg-[#F0F9FF] rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">⚖️</div>
             <p className="text-[15px] font-medium text-text-primary mb-1">No weight logs yet</p>
-            <p className="text-body-sm text-text-secondary">Tap "+ Add" to start tracking weight.</p>
+            <p className="text-body-sm text-text-secondary">Tap &ldquo;+ Add&rdquo; to start tracking weight.</p>
           </div>
         ) : (
           <>

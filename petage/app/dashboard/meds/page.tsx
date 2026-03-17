@@ -227,7 +227,7 @@ export default function MedsPage() {
           <div className="text-center py-16">
             <div className="w-16 h-16 bg-pale-amber rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">💊</div>
             <p className="text-[15px] font-medium text-text-primary mb-1">No medications yet</p>
-            <p className="text-body-sm text-text-secondary">Tap "+ Add" to track a medication.</p>
+            <p className="text-body-sm text-text-secondary">Tap &ldquo;+ Add&rdquo; to track a medication.</p>
           </div>
         ) : (
           <div className="space-y-3">

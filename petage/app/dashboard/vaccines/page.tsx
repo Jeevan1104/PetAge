@@ -172,7 +172,7 @@ export default function VaccinesPage() {
           <div className="text-center py-16">
             <div className="w-16 h-16 bg-blue-tint rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">💉</div>
             <p className="text-[15px] font-medium text-text-primary mb-1">No vaccine records yet</p>
-            <p className="text-body-sm text-text-secondary">Tap "+ Add" to log your first vaccine.</p>
+            <p className="text-body-sm text-text-secondary">Tap &ldquo;+ Add&rdquo; to log your first vaccine.</p>
           </div>
         ) : (
           <div className="space-y-3">

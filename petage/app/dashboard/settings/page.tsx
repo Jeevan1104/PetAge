@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuthStore } from "@/lib/store/authStore";
 import Button from "@/components/ui/Button";
 
@@ -31,9 +32,11 @@ export default function SettingsPage() {
           {/* Profile row */}
           <div className="flex items-center gap-4 px-5 py-4">
             {photoURL ? (
-              <img
+              <Image
                 src={photoURL}
                 alt={displayName}
+                width={48}
+                height={48}
                 className="w-12 h-12 rounded-full object-cover"
               />
             ) : (
