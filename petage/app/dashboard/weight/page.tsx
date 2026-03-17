@@ -235,7 +235,7 @@ export default function WeightPage() {
                     <YAxis tick={{ fontSize: 11, fill: "#8FA3B4" }} axisLine={false} tickLine={false} width={40} />
                     <Tooltip
                       contentStyle={{ borderRadius: 8, border: "1px solid #E8EDF2", fontSize: 12 }}
-                      formatter={(v: number) => [`${v} kg`, "Weight"]}
+                      formatter={(v) => [v != null ? `${v} kg` : "—", "Weight"]}
                     />
                     <Line
                       type="monotone"
