@@ -1,5 +1,6 @@
 import Image from "next/image";
 import StatusPill from "./StatusPill";
+import { speciesEmoji } from "@/lib/constants";
 
 // Design Brief §05: 220px wide, 16px radius, 52×52 avatar
 // 2px Clinical Blue ring when active
@@ -20,13 +21,6 @@ interface PetCardProps {
 interface AddPetCardProps {
   onClick?: () => void;
 }
-
-const speciesEmoji: Record<string, string> = {
-  dog: "🐕",
-  cat: "🐈",
-  exotic: "🦎",
-  other: "🐾",
-};
 
 export function PetCard({
   name,

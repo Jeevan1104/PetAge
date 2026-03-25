@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/authStore";
 import BottomNav from "@/components/ui/BottomNav";
+import SidebarLink from "@/components/ui/SidebarLink";
+import MobileThemeToggle from "@/components/ui/MobileThemeToggle";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 // Protected layout — requires authentication
 // Web uses sidebar nav (md+), mobile uses bottom tab bar
@@ -22,8 +25,14 @@ export default function DashboardLayout({
   };
 
   useEffect(() => {
-    if (!loading && !firebaseUser) {
+    if (loading) return;
+    if (!firebaseUser) {
       router.push("/login");
+      return;
+    }
+    // Google accounts are pre-verified; email/password accounts must verify
+    if (!firebaseUser.emailVerified && firebaseUser.providerData[0]?.providerId === "password") {
+      router.push("/verify-email");
     }
   }, [firebaseUser, loading, router]);
 
@@ -39,8 +48,9 @@ export default function DashboardLayout({
     );
   }
 
-  // Not authenticated
+  // Not authenticated or not verified
   if (!firebaseUser) return null;
+  if (!firebaseUser.emailVerified && firebaseUser.providerData[0]?.providerId === "password") return null;
 
   // Use Firestore user data if available, fall back to Firebase Auth data
   const displayEmail = user?.email ?? firebaseUser.email ?? "";
@@ -63,13 +73,14 @@ export default function DashboardLayout({
           <SidebarLink href="/dashboard" icon="🏠" label="Home" />
           <SidebarLink href="/dashboard/vaccines" icon="💉" label="Vaccines" />
           <SidebarLink href="/dashboard/visits" icon="📋" label="Vet Visits" />
-          <SidebarLink href="/dashboard/meds" icon="💊" label="Medications" />
+          <SidebarLink href="/dashboard/medications" icon="💊" label="Medications" />
           <SidebarLink href="/dashboard/weight" icon="⚖️" label="Weight" />
         </nav>
 
         {/* Bottom section */}
-        <div className="px-3 py-4 border-t border-border space-y-1">
+        <div className="px-3 py-4 border-t border-border space-y-2">
           <SidebarLink href="/dashboard/settings" icon="⚙️" label="Settings" />
+          <ThemeToggle />
           <div className="px-3 py-2 mt-2">
             <p className="text-[12px] text-text-tertiary truncate">
               {displayEmail}
@@ -98,39 +109,9 @@ export default function DashboardLayout({
         {children}
       </main>
 
-      {/* Mobile bottom nav */}
+      {/* Mobile bottom nav + theme toggle */}
       <BottomNav />
+      <MobileThemeToggle />
     </div>
-  );
-}
-
-// Sidebar link component
-function SidebarLink({
-  href,
-  icon,
-  label,
-}: {
-  href: string;
-  icon: string;
-  label: string;
-}) {
-  const pathname = usePathname();
-  const isActive =
-    href === "/dashboard"
-      ? pathname === "/dashboard"
-      : pathname.startsWith(href);
-
-  return (
-    <a
-      href={href}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] transition-colors duration-150 ${
-        isActive
-          ? "bg-blue-tint text-clinical-blue font-semibold"
-          : "text-text-secondary hover:bg-blue-tint hover:text-clinical-blue font-medium"
-      }`}
-    >
-      <span className="text-[16px] w-5 text-center">{icon}</span>
-      <span>{label}</span>
-    </a>
   );
 }

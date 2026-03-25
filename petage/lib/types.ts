@@ -51,9 +51,11 @@ export interface Vaccine {
   dateAdministered: Timestamp;
   expiryDate?: Timestamp;
   reminderEnabled: boolean;
+  reminderLeadDays: number;
   reminderSent: boolean;
   status: VaccineStatus;
   notes?: string;
+  isArchived: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -66,9 +68,10 @@ export interface VetVisit {
   visitDate: Timestamp;
   clinicName?: string;
   vetName?: string;
+  cost?: number;
   reason: string;
   notes?: string;
-  photoURLs?: string[];
+  isArchived: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -88,6 +91,7 @@ export interface Medication {
   startDate: Timestamp;
   nextDueDate: Timestamp;
   reminderEnabled: boolean;
+  reminderSent: boolean;
   isArchived: boolean;
   notes?: string;
   createdAt: Timestamp;

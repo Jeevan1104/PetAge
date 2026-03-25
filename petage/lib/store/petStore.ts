@@ -4,7 +4,6 @@ import {
   query,
   where,
   onSnapshot,
-  orderBy,
 } from "firebase/firestore";
 import { getDb, getAuth } from "@/lib/firebase";
 import type { Pet } from "@/lib/types";
@@ -25,6 +24,7 @@ interface PetState {
   error: string | null;
 
   setActivePet: (petId: string | null) => void;
+  fetchPets: () => Promise<void>;
   subscribeToUserPets: (userId: string) => () => void;
   createPet: (
     data: CreatePetData
@@ -46,25 +46,75 @@ export const usePetStore = create<PetState>((set) => ({
 
   setActivePet: (petId) => set({ activePetId: petId }),
 
+  fetchPets: async () => {
+    try {
+      set({ loading: true, error: null });
+      const token = await getToken();
+      const res = await fetch("/api/pets", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        set({ loading: false, error: json.error ?? "Failed to load pets" });
+        return;
+      }
+      const pets = (json.pets as Pet[])
+        .filter((p) => !p.isArchived)
+        .sort((a, b) => {
+          const aTs = (a.createdAt as unknown as { toMillis: () => number })?.toMillis?.() ?? 0;
+          const bTs = (b.createdAt as unknown as { toMillis: () => number })?.toMillis?.() ?? 0;
+          return aTs - bTs;
+        });
+      set({ pets, loading: false });
+    } catch (err) {
+      set({
+        loading: false,
+        error: err instanceof Error ? err.message : "Failed to load pets",
+      });
+    }
+  },
+
   subscribeToUserPets: (userId) => {
     set({ loading: true });
 
+    // Single-field query avoids composite index requirement
     const q = query(
       collection(getDb(), "pets"),
-      where("ownerId", "==", userId),
-      where("isArchived", "==", false),
-      orderBy("createdAt", "asc")
+      where("ownerId", "==", userId)
     );
 
     const unsubscribe = onSnapshot(
       q,
       (snap) => {
-        const pets = snap.docs.map((d) => ({ ...d.data() } as Pet));
+        const pets = snap.docs
+          .map((d) => ({ petId: d.id, ...d.data() } as Pet))
+          .filter((p) => !p.isArchived)
+          .sort((a, b) => {
+            const aTs = (a.createdAt as unknown as { toMillis: () => number })?.toMillis?.() ?? 0;
+            const bTs = (b.createdAt as unknown as { toMillis: () => number })?.toMillis?.() ?? 0;
+            return aTs - bTs;
+          });
         set({ pets, loading: false, error: null });
       },
       (err) => {
-        console.error("Pet subscription error:", err);
-        set({ loading: false, error: err.message });
+        console.error("Pet subscription error (falling back to API):", err);
+        // Firestore rules may not be deployed — fall back to the REST API
+        getToken()
+          .then((token) =>
+            fetch("/api/pets", { headers: { Authorization: `Bearer ${token}` } })
+          )
+          .then((res) => res.json())
+          .then((json) => {
+            const pets = ((json.pets as Pet[]) ?? [])
+              .filter((p) => !p.isArchived)
+              .sort((a, b) => {
+                const aTs = (a.createdAt as unknown as { toMillis: () => number })?.toMillis?.() ?? 0;
+                const bTs = (b.createdAt as unknown as { toMillis: () => number })?.toMillis?.() ?? 0;
+                return aTs - bTs;
+              });
+            set({ pets, loading: false, error: null });
+          })
+          .catch(() => set({ loading: false, error: err.message }));
       }
     );
 

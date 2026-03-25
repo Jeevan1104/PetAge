@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/store/authStore";
 import { usePetStore } from "@/lib/store/petStore";
 import { PetCard, AddPetCard } from "@/components/ui/PetCard";
@@ -11,15 +11,19 @@ import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
-  const { pets, subscribeToUserPets, setActivePet, activePetId } = usePetStore();
+  const { user, firebaseUser } = useAuthStore();
+  const { pets, loading: petsLoading, error: petsError, subscribeToUserPets, setActivePet, activePetId } = usePetStore();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
+  // Subscribe for real-time updates; falls back to the API if Firestore rules
+  // haven't been deployed yet.
   useEffect(() => {
-    if (user?.uid) {
-      const unsubscribe = subscribeToUserPets(user.uid);
+    const uid = firebaseUser?.uid;
+    if (uid) {
+      const unsubscribe = subscribeToUserPets(uid);
       return () => unsubscribe();
     }
-  }, [user?.uid, subscribeToUserPets]);
+  }, [firebaseUser?.uid, subscribeToUserPets]);
 
   const handlePetClick = (petId: string) => {
     setActivePet(petId);
@@ -27,9 +31,9 @@ export default function DashboardPage() {
   };
 
   const handleAddPet = () => {
-    // Check limit on client for better UX (actual check is server-side)
-    if (user?.tier === "free" && pets.length >= 2) {
-      router.push("/dashboard/premium?reason=limit_reached");
+    const isPremium = user?.tier === "premium";
+    if (!isPremium && pets.length >= 2) {
+      setShowUpgradeModal(true);
       return;
     }
     router.push("/dashboard/pets/new");
@@ -50,7 +54,18 @@ export default function DashboardPage() {
       {/* Pet Horizontal List */}
       <section className="mb-12">
         <div className="section-label mb-4">My Pets</div>
+        {petsError && (
+          <div className="mb-4 px-4 py-3 bg-pale-red rounded-[10px] text-[13px] text-status-red">
+            Could not load pets: {petsError}
+          </div>
+        )}
         <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+          {petsLoading && pets.length === 0 ? (
+            <div className="flex items-center gap-2 text-body-sm text-text-secondary py-2">
+              <div className="w-4 h-4 rounded-full border-2 border-clinical-blue border-t-transparent animate-spin" />
+              Loading pets...
+            </div>
+          ) : null}
           {pets.map((pet) => (
             <PetCard
               key={pet.petId}
@@ -96,6 +111,45 @@ export default function DashboardPage() {
            </div>
         </div>
       </section>
+
+      {/* Upgrade modal */}
+      {showUpgradeModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm"
+          onClick={() => setShowUpgradeModal(false)}
+        >
+          <div
+            className="w-full max-w-[360px] bg-card rounded-2xl p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-3xl mb-4 text-center">🐾</div>
+            <h2 className="text-h2 text-navy text-center mb-2">
+              Free plan limit reached
+            </h2>
+            <p className="text-body-sm text-text-secondary text-center mb-6">
+              You&apos;ve added 2 pets — the maximum on the free plan. Upgrade
+              to Premium for unlimited pets and more.
+            </p>
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  setShowUpgradeModal(false);
+                  router.push("/dashboard/premium");
+                }}
+                className="w-full py-3 rounded-[10px] bg-navy text-white text-[15px] font-semibold hover:bg-navy/90 transition-colors"
+              >
+                Upgrade to Premium
+              </button>
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="w-full py-3 rounded-[10px] text-text-secondary text-[14px] hover:text-text-primary transition-colors"
+              >
+                Maybe later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

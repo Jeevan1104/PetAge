@@ -1,0 +1,113 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users collection — each user may read/write only their own document
+    match /users/{userId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+    }
+
+    // Pets collection — users may only access their own pets
+    match /pets/{petId} {
+      // Read own pets
+      allow read: if request.auth != null
+                  && resource.data.ownerId == request.auth.uid;
+
+      // Create: ownerId in the new document must match the authenticated user
+      allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid;
+
+      // Update: block any write that changes ownerId; user must own existing doc
+      allow update: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid
+                    && request.resource.data.ownerId == resource.data.ownerId;
+
+      // Delete: user must own the document
+      allow delete: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Vaccines collection — users may only access vaccines for their own pets
+    match /vaccines/{vaccineId} {
+      // Read own vaccine records
+      allow read: if request.auth != null
+                  && resource.data.ownerId == request.auth.uid;
+
+      // Create: ownerId and petId must be present and ownerId must match
+      allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid
+                    && request.resource.data.petId is string;
+
+      // Update: block any write that changes ownerId or petId
+      allow update: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid
+                    && request.resource.data.ownerId == resource.data.ownerId
+                    && request.resource.data.petId == resource.data.petId;
+
+      // Delete: user must own the document
+      allow delete: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Vet visits collection — users may only access visits for their own pets
+    match /vetVisits/{visitId} {
+      allow read: if request.auth != null
+                  && resource.data.ownerId == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid
+                    && request.resource.data.petId is string;
+
+      allow update: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid
+                    && request.resource.data.ownerId == resource.data.ownerId
+                    && request.resource.data.petId == resource.data.petId;
+
+      allow delete: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Medications collection — users may only access medications for their own pets
+    match /medications/{medicationId} {
+      allow read: if request.auth != null
+                  && resource.data.ownerId == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid
+                    && request.resource.data.petId is string;
+
+      allow update: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid
+                    && request.resource.data.ownerId == resource.data.ownerId
+                    && request.resource.data.petId == resource.data.petId;
+
+      allow delete: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Weight logs collection — users may only access weight logs for their own pets
+    match /pets/{petId}/weightLogs/{logId} {
+      allow read: if request.auth != null
+                  && resource.data.ownerId == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid
+                    && request.resource.data.petId == petId;
+
+      allow update: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid
+                    && request.resource.data.ownerId == resource.data.ownerId
+                    && request.resource.data.petId == resource.data.petId;
+
+      allow delete: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Block all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

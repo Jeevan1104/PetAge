@@ -18,7 +18,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: "🏠" },
   { href: "/dashboard/vaccines", label: "Vaccines", icon: "💉" },
   { href: "/dashboard/visits", label: "Visits", icon: "📋" },
-  { href: "/dashboard/meds", label: "Meds", icon: "💊" },
+  { href: "/dashboard/medications", label: "Meds", icon: "💊" },
   { href: "/dashboard/settings", label: "Settings", icon: "⚙️" },
 ];
 

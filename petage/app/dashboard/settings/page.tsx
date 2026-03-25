@@ -1,22 +1,128 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuthStore } from "@/lib/store/authStore";
+import { getAuth } from "firebase/auth";
 import Button from "@/components/ui/Button";
+import SettingsRow from "@/components/ui/SettingsRow";
+
+const LEAD_TIME_OPTIONS = [
+  { value: 7, label: "7 days before" },
+  { value: 14, label: "14 days before" },
+  { value: 30, label: "30 days before" },
+];
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, firebaseUser, logout } = useAuthStore();
+  const { user, firebaseUser, logout, updatePreferences } = useAuthStore();
 
   const displayName = user?.displayName || firebaseUser?.displayName || "";
   const email = user?.email || firebaseUser?.email || "";
   const tier = user?.tier ?? "free";
   const photoURL = user?.photoURL || firebaseUser?.photoURL || null;
 
+  const [saving, setSaving] = useState<string | null>(null);
+  const [exportingJson, setExportingJson] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleToggle = async (
+    key: "notifPush" | "notifEmail",
+    current: boolean
+  ) => {
+    setSaving(key);
+    await updatePreferences({ [key]: !current });
+    setSaving(null);
+  };
+
+  const handleLeadTime = async (days: number) => {
+    setSaving("reminderLeadDays");
+    await updatePreferences({ reminderLeadDays: days });
+    setSaving(null);
+  };
+
   const handleLogout = async () => {
     await logout();
     router.push("/login");
+  };
+
+  const handleExportJson = async () => {
+    try {
+      setExportingJson(true);
+      const fbUser = getAuth().currentUser;
+      if (!fbUser) return;
+      const token = await fbUser.getIdToken();
+      
+      const res = await fetch("/api/user/export", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Export failed");
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `petage_export_${Date.now()}.json`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to export data");
+    } finally {
+      setExportingJson(false);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    try {
+      setExportingPdf(true);
+      const fbUser = getAuth().currentUser;
+      if (!fbUser) return;
+      const token = await fbUser.getIdToken();
+      
+      const res = await fetch("/api/user/export/pdf", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Export failed");
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `petage_export_${Date.now()}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to export PDF");
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone and all data will be lost.")) return;
+    try {
+      setDeleting(true);
+      const fbUser = getAuth().currentUser;
+      if (!fbUser) return;
+      const token = await fbUser.getIdToken();
+      
+      const res = await fetch("/api/user/delete", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      
+      await logout();
+      router.push("/login");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete account");
+      setDeleting(false);
+    }
   };
 
   return (
@@ -66,7 +172,7 @@ export default function SettingsPage() {
                 <p className="text-[14px] font-medium text-text-primary">Upgrade to Premium</p>
                 <p className="text-body-sm text-text-secondary">Unlimited pets, PDF reports & more</p>
               </div>
-              <Button variant="secondary" size="sm">
+              <Button variant="secondary" size="sm" onClick={() => router.push("/dashboard/premium")}>
                 Upgrade
               </Button>
             </div>
@@ -74,24 +180,124 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      {/* Preferences section */}
+      {/* Notifications section */}
       <section className="mb-8">
         <h2 className="text-[13px] font-semibold text-text-tertiary uppercase tracking-wider mb-3">
-          Preferences
+          Notifications
         </h2>
         <div className="bg-card rounded-[16px] border border-border divide-y divide-border">
-          <SettingsRow
-            label="Reminder lead time"
-            value={`${user?.reminderLeadDays ?? 30} days before due`}
-          />
-          <SettingsRow
-            label="Email notifications"
-            value={user?.notifEmail ? "On" : "Off"}
-          />
-          <SettingsRow
-            label="Push notifications"
-            value={user?.notifPush ? "On" : "Off"}
-          />
+          {/* Email toggle */}
+          <div className="flex items-center justify-between px-5 py-3.5">
+            <div>
+              <p className="text-[14px] text-text-primary">Email reminders</p>
+              <p className="text-[12px] text-text-tertiary mt-0.5">Vaccine & medication alerts</p>
+            </div>
+            <button
+              onClick={() => handleToggle("notifEmail", user?.notifEmail ?? true)}
+              disabled={saving === "notifEmail"}
+              className={`relative w-[44px] h-[24px] rounded-full transition-colors duration-200 ${
+                user?.notifEmail ? "bg-clinical-blue" : "bg-border"
+              } ${saving === "notifEmail" ? "opacity-50" : ""}`}
+              aria-label="Toggle email notifications"
+            >
+              <span
+                className={`absolute top-[2px] left-[2px] w-[20px] h-[20px] bg-white rounded-full shadow-sm transition-transform duration-200 ${
+                  user?.notifEmail ? "translate-x-[20px]" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Push toggle */}
+          <div className="flex items-center justify-between px-5 py-3.5">
+            <div>
+              <p className="text-[14px] text-text-primary">Push notifications</p>
+              <p className="text-[12px] text-text-tertiary mt-0.5">Mobile app alerts</p>
+            </div>
+            <button
+              onClick={() => handleToggle("notifPush", user?.notifPush ?? true)}
+              disabled={saving === "notifPush"}
+              className={`relative w-[44px] h-[24px] rounded-full transition-colors duration-200 ${
+                user?.notifPush ? "bg-clinical-blue" : "bg-border"
+              } ${saving === "notifPush" ? "opacity-50" : ""}`}
+              aria-label="Toggle push notifications"
+            >
+              <span
+                className={`absolute top-[2px] left-[2px] w-[20px] h-[20px] bg-white rounded-full shadow-sm transition-transform duration-200 ${
+                  user?.notifPush ? "translate-x-[20px]" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Lead time dropdown */}
+          <div className="flex items-center justify-between px-5 py-3.5">
+            <div>
+              <p className="text-[14px] text-text-primary">Reminder lead time</p>
+              <p className="text-[12px] text-text-tertiary mt-0.5">How early to notify before due</p>
+            </div>
+            <select
+              value={user?.reminderLeadDays ?? 30}
+              onChange={(e) => handleLeadTime(Number(e.target.value))}
+              disabled={saving === "reminderLeadDays"}
+              className={`text-[13px] font-medium text-navy bg-surface border border-border rounded-[8px] px-3 py-1.5 focus:outline-none focus:border-clinical-blue transition-colors ${
+                saving === "reminderLeadDays" ? "opacity-50" : ""
+              }`}
+            >
+              {LEAD_TIME_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </section>
+
+      {/* Data & Privacy section */}
+      <section className="mb-8">
+        <h2 className="text-[13px] font-semibold text-text-tertiary uppercase tracking-wider mb-3">
+          Data & Privacy
+        </h2>
+        <div className="bg-card rounded-[16px] border border-border divide-y divide-border">
+          <div 
+            className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-surface/50 transition-colors"
+            onClick={exportingJson ? undefined : handleExportJson}
+          >
+            <div>
+              <p className="text-[14px] font-medium text-text-primary">Export Data (JSON)</p>
+              <p className="text-[12px] text-text-tertiary mt-0.5">Download a machine-readable backup</p>
+            </div>
+            <span className="text-clinical-blue text-[13px] font-medium">
+              {exportingJson ? "Exporting..." : "Export"}
+            </span>
+          </div>
+          
+          <div 
+            className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-surface/50 transition-colors"
+            onClick={exportingPdf ? undefined : handleExportPdf}
+          >
+            <div>
+              <p className="text-[14px] font-medium text-text-primary">Export Data (PDF)</p>
+              <p className="text-[12px] text-text-tertiary mt-0.5">Download a human-readable summary</p>
+            </div>
+            <span className="text-clinical-blue text-[13px] font-medium">
+              {exportingPdf ? "Generating..." : "Export"}
+            </span>
+          </div>
+
+          <div 
+            className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-pale-red transition-colors"
+            onClick={deleting ? undefined : handleDeleteAccount}
+          >
+            <div>
+              <p className="text-[14px] font-medium text-status-red">Delete Account</p>
+              <p className="text-[12px] text-status-red/70 mt-0.5">Permanently remove all data</p>
+            </div>
+            <span className="text-status-red text-[13px] font-medium">
+              {deleting ? "Deleting..." : "Delete"}
+            </span>
+          </div>
         </div>
       </section>
 
@@ -117,28 +323,8 @@ export default function SettingsPage() {
       </Button>
 
       <p className="text-center text-[11px] text-text-tertiary mt-6">
-        PetAge v1.0 · Free plan
+        PetAge v1.0 · {tier === "premium" ? "Premium" : "Free"} plan
       </p>
-    </div>
-  );
-}
-
-function SettingsRow({
-  label,
-  value,
-  action = false,
-}: {
-  label: string;
-  value?: string;
-  action?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between px-5 py-3.5">
-      <span className="text-[14px] text-text-primary">{label}</span>
-      <div className="flex items-center gap-2">
-        {value && <span className="text-body-sm text-text-secondary">{value}</span>}
-        {action && <span className="text-text-tertiary text-[16px]">›</span>}
-      </div>
     </div>
   );
 }

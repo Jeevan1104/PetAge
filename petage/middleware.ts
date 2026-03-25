@@ -1,35 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Next.js middleware for route protection
-// NOTE: Firebase Auth JWT validation happens client-side via onAuthStateChanged
-// This middleware provides basic path-based redirects for unauthenticated users
+// Middleware runs on the Edge runtime — Firebase Admin SDK is NOT available here.
+// Route protection is enforced at three layers:
+//   1. This middleware: fast path-based redirects via session cookie heuristic
+//   2. Client-side: dashboard/layout.tsx checks firebaseUser + emailVerified
+//   3. API routes: verifyIdToken() with checkRevoked=true on every request
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Auth pages — redirect to dashboard if already authenticated
-  // (actual auth check happens client-side, this is a UX optimization)
-  const isAuthPage =
-    pathname === "/login" ||
-    pathname === "/signup" ||
-    pathname === "/forgot-password";
-
-  // Dashboard pages need authentication
-  const isDashboardPage = pathname.startsWith("/dashboard");
-
-  // For dashboard pages, we rely on client-side auth guard in layout.tsx
-  // The middleware just handles the basic routing logic
-
-  if (isDashboardPage || isAuthPage) {
-    // Let the request through — client-side guards handle the rest
-    return NextResponse.next();
-  }
-
+  // Firebase stores auth state in IndexedDB, not cookies — cookie-based
+  // redirect detection is unreliable and causes redirect loops for authenticated
+  // users navigating to /dashboard. Auth enforcement is handled at two layers:
+  //   1. Client-side: dashboard/layout.tsx checks firebaseUser + emailVerified
+  //   2. API routes: verifyIdToken() with checkRevoked=true on every request
   return NextResponse.next();
 }
 
 export const config = {
-  // Match dashboard and auth routes
-  matcher: ["/dashboard/:path*", "/login", "/signup", "/forgot-password"],
+  matcher: ["/dashboard/:path*", "/login", "/signup", "/forgot-password", "/verify-email"],
 };

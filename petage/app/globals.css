@@ -9,25 +9,63 @@
 
 @layer base {
   :root {
-    /* Light mode surfaces */
-    --background: #F7F9FC;
-    --foreground: #1A2540;
+    /* Colors */
+    --navy: #0B1F3A;
+    --clinical-blue: #1C5EA8;
+    --mid-blue: #3B82C4;
+    --blue-tint: #E8F2FB;
+    --teal: #0E7490;
+    --pale-teal: #CCFBF1;
+
+    /* Status */
+    --status-green: #15803D;
+    --pale-green: #DCFCE7;
+    --status-amber: #B45309;
+    --pale-amber: #FEF3C7;
+    --status-red: #BE123C;
+    --pale-red: #FFE4E6;
+
+    /* Surfaces & Borders */
+    --surface: #F7F9FC;
     --card: #FFFFFF;
     --border: #DDE4EF;
     --border-strong: #C5D0E0;
+
+    /* Text */
+    --text-primary: #1A2540;
+    --text-secondary: #4A5568;
+    --text-tertiary: #8896AA;
   }
 
+  /* Dark mode is now controlled via ThemeProvider (JS) which adds/removes .dark class.
+     System preference is handled in ThemeProvider when theme === "system". */
+
+  /* Dark class manual override */
   .dark {
-    --background: #0A0F1A;
-    --foreground: #E2E8F0;
+    --navy: #E2E8F0;
+    --clinical-blue: #3B82C4;
+    --mid-blue: #60A5FA;
+    --blue-tint: #1E3A8A;
+    --teal: #2DD4BF;
+    --pale-teal: #134E4A;
+    --status-green: #34D399;
+    --pale-green: #064E3B;
+    --status-amber: #FBBF24;
+    --pale-amber: #78350F;
+    --status-red: #F87171;
+    --pale-red: #881337;
+    --surface: #0A0F1A;
     --card: #1A2335;
     --border: #243044;
     --border-strong: #334155;
+    --text-primary: #E2E8F0;
+    --text-secondary: #94A3B8;
+    --text-tertiary: #64748B;
   }
 
   body {
-    color: var(--foreground);
-    background: var(--background);
+    color: var(--text-primary);
+    background: var(--surface);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -73,7 +111,7 @@
   /* Record rows — 64px min height */
   .record-row {
     @apply flex items-center justify-between px-4 py-3
-           min-h-[64px] border-b border-border bg-card;
+           min-h-[64px] border-b border-border bg-card transition-colors;
   }
   .record-row:last-child {
     @apply border-b-0;

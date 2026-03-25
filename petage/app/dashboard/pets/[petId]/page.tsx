@@ -7,14 +7,8 @@ import { differenceInYears, differenceInMonths } from "date-fns";
 import Image from "next/image";
 import { getDb } from "@/lib/firebase";
 import { usePetStore } from "@/lib/store/petStore";
+import { speciesEmoji } from "@/lib/constants";
 import type { Pet } from "@/lib/types";
-
-const speciesEmoji: Record<string, string> = {
-  dog: "🐕",
-  cat: "🐈",
-  exotic: "🦎",
-  other: "🐾",
-};
 
 const healthTiles = [
   {
@@ -34,7 +28,7 @@ const healthTiles = [
   {
     icon: "💊",
     label: "Medications",
-    href: "meds",
+    href: "medications",
     bg: "bg-pale-amber",
     text: "text-status-amber",
   },
@@ -141,10 +135,18 @@ export default function PetDashboardPage() {
         {/* Back */}
         <button
           onClick={() => router.push("/dashboard")}
-          className="absolute top-4 left-4 w-9 h-9 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-colors text-lg"
+          className="absolute top-4 left-4 w-9 h-9 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-colors"
           aria-label="Back"
         >
-          ←
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="24" height="24" viewBox="0 0 24 24" 
+            fill="none" stroke="currentColor" strokeWidth="2.5" 
+            strokeLinecap="round" strokeLinejoin="round" 
+            className="w-5 h-5 pr-[1px]"
+          >
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
         </button>
 
         {/* Name / breed overlay */}

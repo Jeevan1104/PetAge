@@ -5,6 +5,7 @@ import {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
+  sendEmailVerification,
   User as FirebaseUser,
 } from "firebase/auth";
 import {
@@ -30,6 +31,11 @@ interface AuthState {
   logout: () => Promise<void>;
   clearError: () => void;
   initAuth: () => () => void;
+  updatePreferences: (prefs: {
+    notifPush?: boolean;
+    notifEmail?: boolean;
+    reminderLeadDays?: number;
+  }) => Promise<{ error?: string }>;
 }
 
 interface UserCreateData {
@@ -51,11 +57,12 @@ function getAuthErrorMessage(err: unknown): string {
     case "auth/invalid-credential":
     case "auth/wrong-password":
     case "auth/user-not-found":
+      // Deliberately identical message — don't reveal whether the email exists
       return "Incorrect email or password. Please try again.";
     case "auth/email-already-in-use":
       return "An account with this email already exists.";
     case "auth/weak-password":
-      return "Password must be at least 6 characters.";
+      return "Password must be at least 8 characters.";
     case "auth/invalid-email":
       return "Please enter a valid email address.";
     case "auth/user-disabled":
@@ -86,9 +93,20 @@ export const useAuthStore = create<AuthState>((set) => ({
   signUp: async (email, password, displayName) => {
     try {
       set({ error: null });
-      const { user: fbUser } = await createUserWithEmailAndPassword(getAuth(), email, password);
+      const { user: fbUser } = await createUserWithEmailAndPassword(
+        getAuth(),
+        email,
+        password
+      );
 
-      // Create user doc in Firestore — best effort, don't block auth
+      // Send verification email immediately — best effort, don't block account creation
+      try {
+        await sendEmailVerification(fbUser);
+      } catch {
+        // Non-fatal: user can request another from /verify-email
+      }
+
+      // Create Firestore user doc
       const userData: UserCreateData = {
         uid: fbUser.uid,
         email: fbUser.email!,
@@ -127,7 +145,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ error: null });
       const { user: fbUser } = await signInWithPopup(getAuth(), getGoogleProvider());
 
-      // Create user doc if first sign-in — best effort
+      // Google accounts are pre-verified by Google — no email verification needed
       try {
         const userRef = doc(getDb(), "users", fbUser.uid);
         const userSnap = await getDoc(userRef);
@@ -156,6 +174,22 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     try {
+      const fbUser = getAuth().currentUser;
+
+      // Revoke refresh tokens server-side before signing out client-side.
+      // This ensures stolen tokens cannot be used after logout.
+      if (fbUser) {
+        try {
+          const token = await fbUser.getIdToken();
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        } catch {
+          // Non-fatal: proceed with client-side sign-out regardless
+        }
+      }
+
       await signOut(getAuth());
       set({ user: null, firebaseUser: null });
     } catch (err: unknown) {
@@ -178,7 +212,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             set({ user: userSnap.data() as User });
           }
         } catch {
-          // Firestore unavailable — app works, just without stored preferences
+          // Firestore unavailable — app works without stored preferences
         }
       } else {
         set({ user: null, firebaseUser: null, loading: false });
@@ -186,5 +220,38 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
 
     return unsubscribe;
+  },
+
+  updatePreferences: async (prefs) => {
+    try {
+      const fbUser = getAuth().currentUser;
+      if (!fbUser) return { error: "Not authenticated" };
+
+      const token = await fbUser.getIdToken();
+      const res = await fetch("/api/user/preferences", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(prefs),
+      });
+
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        return { error: (json as Record<string, string>).error ?? "Failed to update preferences" };
+      }
+
+      // Optimistic local update
+      set((state) => ({
+        user: state.user
+          ? { ...state.user, ...prefs, updatedAt: state.user.updatedAt }
+          : null,
+      }));
+
+      return {};
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : "Failed to update preferences" };
+    }
   },
 }));
