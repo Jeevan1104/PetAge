@@ -41,7 +41,7 @@ export async function GET(
     ]);
 
     const formatData = (snap: FirebaseFirestore.QuerySnapshot) =>
-      snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as any));
 
     // Cast aggregated data into types
     // Cast IDs internally based on their type architectures

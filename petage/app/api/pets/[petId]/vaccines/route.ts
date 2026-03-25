@@ -42,11 +42,11 @@ export async function GET(
       .get();
 
     const vaccines = snap.docs
-      .map((d) => ({ vaccineId: d.id, ...d.data() }))
+      .map((d) => ({ vaccineId: d.id, ...d.data() } as any))
       .filter((v) => !v.isArchived)
       .sort((a, b) => {
-        const aTs = (a.dateAdministered as unknown as { toMillis: () => number })?.toMillis?.() ?? 0;
-        const bTs = (b.dateAdministered as unknown as { toMillis: () => number })?.toMillis?.() ?? 0;
+        const aTs = a.dateAdministered?.toMillis?.() ?? 0;
+        const bTs = b.dateAdministered?.toMillis?.() ?? 0;
         return bTs - aTs;
       });
     return NextResponse.json({ vaccines });

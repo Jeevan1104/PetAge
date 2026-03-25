@@ -30,7 +30,7 @@ export async function GET(request: Request) {
       .orderBy("createdAt", "asc")
       .get();
 
-    const pets = snap.docs.map((d) => ({ petId: d.id, ...d.data() }));
+    const pets = snap.docs.map((d) => ({ petId: d.id, ...d.data() } as any));
     return NextResponse.json({ pets });
   } catch (err) {
     logger.error("pets.get.internal_error", { error: err instanceof Error ? err.message : String(err) });

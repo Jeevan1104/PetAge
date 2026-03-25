@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch user profile
     const userDoc = await db.collection("users").doc(uid).get();
-    const profile = userDoc.exists ? userDoc.data() : null;
+    const profile = (userDoc.exists ? userDoc.data() : null) as any;
 
     // Fetch all collections for this owner
     const [petsSnap, vaccinesSnap, medsSnap, visitsSnap] = await Promise.all([
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     const formatData = (snap: FirebaseFirestore.QuerySnapshot) =>
-      snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as any));
 
     const pets = formatData(petsSnap);
     const vaccines = formatData(vaccinesSnap);

@@ -41,13 +41,11 @@ export async function GET(
       .get();
 
     const visits = snap.docs
-      .map((d) => ({ visitId: d.id, ...d.data() }))
-      .filter((v) => !(v as Record<string, unknown>).isArchived)
+      .map((d) => ({ visitId: d.id, ...d.data() } as any))
+      .filter((v) => !v.isArchived)
       .sort((a, b) => {
-        const aTs =
-          (a.visitDate as unknown as { toMillis?: () => number })?.toMillis?.() ?? 0;
-        const bTs =
-          (b.visitDate as unknown as { toMillis?: () => number })?.toMillis?.() ?? 0;
+        const aTs = a.visitDate?.toMillis?.() ?? 0;
+        const bTs = b.visitDate?.toMillis?.() ?? 0;
         return bTs - aTs; // newest first
       });
 

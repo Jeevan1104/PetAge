@@ -6,7 +6,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock", {
-  apiVersion: "2024-04-10",
+  apiVersion: "2024-04-10" as any,
   typescript: true,
   appInfo: {
     name: "PetAge Premium",
