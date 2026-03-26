@@ -5,6 +5,7 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rateLimit";
 import { logger } from "@/lib/logger";
 import { createVaccineSchema, computeVaccineStatus } from "@/lib/schemas/vaccine";
+import type { Vaccine } from "@/lib/types";
 
 export async function GET(
   request: Request,
@@ -42,7 +43,7 @@ export async function GET(
       .get();
 
     const vaccines = snap.docs
-      .map((d) => ({ vaccineId: d.id, ...d.data() } as any))
+      .map((d) => ({ vaccineId: d.id, ...d.data() }) as Vaccine)
       .filter((v) => !v.isArchived)
       .sort((a, b) => {
         const aTs = a.dateAdministered?.toMillis?.() ?? 0;

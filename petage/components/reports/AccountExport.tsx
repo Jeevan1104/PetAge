@@ -59,14 +59,14 @@ interface FirestoreTimestamp {
   toDate: () => Date;
 }
 
-interface ExportProfile {
+export interface ExportProfile {
   displayName?: string;
   email?: string;
   tier?: string;
   createdAt?: FirestoreTimestamp;
 }
 
-interface ExportPet {
+export interface ExportPet {
   id: string;
   name: string;
   species: string;
@@ -74,14 +74,14 @@ interface ExportPet {
   dob?: string;
 }
 
-interface ExportVaccine {
+export interface ExportVaccine {
   id: string;
   petId: string;
   name: string;
   dateAdministered?: FirestoreTimestamp;
 }
 
-interface ExportMedication {
+export interface ExportMedication {
   id: string;
   petId: string;
   name: string;
@@ -89,7 +89,7 @@ interface ExportMedication {
   frequency: string;
 }
 
-interface ExportVisit {
+export interface ExportVisit {
   id: string;
   petId: string;
   clinicName?: string;

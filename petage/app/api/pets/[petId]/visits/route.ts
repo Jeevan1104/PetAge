@@ -5,6 +5,7 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rateLimit";
 import { logger } from "@/lib/logger";
 import { createVisitSchema } from "@/lib/schemas/visit";
+import type { VetVisit } from "@/lib/types";
 
 export async function GET(
   request: Request,
@@ -41,7 +42,7 @@ export async function GET(
       .get();
 
     const visits = snap.docs
-      .map((d) => ({ visitId: d.id, ...d.data() } as any))
+      .map((d) => ({ visitId: d.id, ...d.data() }) as VetVisit)
       .filter((v) => !v.isArchived)
       .sort((a, b) => {
         const aTs = a.visitDate?.toMillis?.() ?? 0;

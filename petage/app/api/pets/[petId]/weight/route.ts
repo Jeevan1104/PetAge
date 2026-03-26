@@ -27,7 +27,7 @@ export async function GET(
     const logs = logsSnapshot.docs.map((doc: FirebaseFirestore.QueryDocumentSnapshot) => ({
       logId: doc.id,
       ...doc.data(),
-    } as any));
+    }));
 
     return NextResponse.json({ logs });
   } catch (error) {

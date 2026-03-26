@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import React from "react";
 import { renderToStream } from "@react-pdf/renderer";
-import { AccountExportDocument } from "@/components/reports/AccountExport";
+import {
+  AccountExportDocument,
+  type ExportProfile,
+  type ExportPet,
+  type ExportVaccine,
+  type ExportMedication,
+  type ExportVisit,
+} from "@/components/reports/AccountExport";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch user profile
     const userDoc = await db.collection("users").doc(uid).get();
-    const profile = (userDoc.exists ? userDoc.data() : null) as any;
+    const profile = (userDoc.exists ? userDoc.data() : null) as unknown as ExportProfile | null;
 
     // Fetch all collections for this owner
     const [petsSnap, vaccinesSnap, medsSnap, visitsSnap] = await Promise.all([
@@ -29,12 +36,12 @@ export async function GET(request: NextRequest) {
     ]);
 
     const formatData = (snap: FirebaseFirestore.QuerySnapshot) =>
-      snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as any));
+      snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-    const pets = formatData(petsSnap);
-    const vaccines = formatData(vaccinesSnap);
-    const medications = formatData(medsSnap);
-    const vetVisits = formatData(visitsSnap);
+    const pets = formatData(petsSnap) as unknown as ExportPet[];
+    const vaccines = formatData(vaccinesSnap) as unknown as ExportVaccine[];
+    const medications = formatData(medsSnap) as unknown as ExportMedication[];
+    const vetVisits = formatData(visitsSnap) as unknown as ExportVisit[];
 
     // Render PDF layout dynamically
     const stream = await renderToStream(
