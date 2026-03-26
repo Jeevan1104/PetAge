@@ -58,6 +58,24 @@
       ]
     },
     {
+      "collectionGroup": "vaccines",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isArchived", "order": "ASCENDING" },
+        { "fieldPath": "reminderSent", "order": "ASCENDING" },
+        { "fieldPath": "reminderEnabled", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "medications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isArchived", "order": "ASCENDING" },
+        { "fieldPath": "reminderSent", "order": "ASCENDING" },
+        { "fieldPath": "reminderEnabled", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "weightLogs",
       "queryScope": "COLLECTION_GROUP",
       "fields": [

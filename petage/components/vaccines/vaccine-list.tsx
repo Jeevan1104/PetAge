@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import type { Vaccine } from "@/lib/types";
 import VaccineCard from "./vaccine-card";
 import { usePetStore } from "@/lib/store/petStore";
@@ -17,6 +17,16 @@ export default function VaccineList({ vaccines, petId }: VaccineListProps) {
     }
   }, [petId, pets.length, fetchPets]);
 
+  // Sort: Overdue → Due Soon → Current
+  const { overdueVaccines, otherVaccines } = useMemo(() => {
+    const order: Record<string, number> = { overdue: 1, due_soon: 2, current: 3 };
+    const sorted = [...vaccines].sort((a, b) => (order[a.status] || 4) - (order[b.status] || 4));
+    return {
+      overdueVaccines: sorted.filter(v => v.status === "overdue"),
+      otherVaccines: sorted.filter(v => v.status !== "overdue"),
+    };
+  }, [vaccines]);
+
   if (vaccines.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
@@ -30,15 +40,6 @@ export default function VaccineList({ vaccines, petId }: VaccineListProps) {
       </div>
     );
   }
-
-  // Sort: Overdue → Due Soon → Current
-  const order = { overdue: 1, due_soon: 2, current: 3 };
-  const sortedVaccines = [...vaccines].sort((a, b) => {
-    return (order[a.status] || 4) - (order[b.status] || 4);
-  });
-
-  const overdueVaccines = sortedVaccines.filter((v) => v.status === "overdue");
-  const otherVaccines = sortedVaccines.filter((v) => v.status !== "overdue");
 
   const getPetName = (vPetId: string) => {
     if (petId) return undefined; // single pet view doesn't need pet name

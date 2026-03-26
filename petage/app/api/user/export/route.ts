@@ -24,32 +24,23 @@ export async function GET(request: NextRequest) {
     const userDoc = await adminDb.collection("users").doc(uid).get();
     const profile = userDoc.exists ? userDoc.data() : null;
 
-    // Fetch pets with weight logs
-    const petsSnap = await adminDb.collection("pets").where("ownerId", "==", uid).get();
-    const pets = [];
-    for (const doc of petsSnap.docs) {
-      const petData = doc.data();
-      
+    // Fetch all collections in parallel
+    const [petsSnap, vaccinesSnap, medsSnap, visitsSnap] = await Promise.all([
+      adminDb.collection("pets").where("ownerId", "==", uid).get(),
+      adminDb.collection("vaccines").where("ownerId", "==", uid).get(),
+      adminDb.collection("medications").where("ownerId", "==", uid).get(),
+      adminDb.collection("vetVisits").where("ownerId", "==", uid).get(),
+    ]);
+
+    // Fetch weight logs for all pets in parallel
+    const pets = await Promise.all(petsSnap.docs.map(async (doc) => {
       const weightSnap = await adminDb.collection(`pets/${doc.id}/weightLogs`).get();
       const weightLogs = weightSnap.docs.map(wDoc => ({ id: wDoc.id, ...wDoc.data() }));
-      
-      pets.push({
-        id: doc.id,
-        ...petData,
-        weightLogs,
-      });
-    }
+      return { id: doc.id, ...doc.data(), weightLogs };
+    }));
 
-    // Fetch vaccines
-    const vaccinesSnap = await adminDb.collection("vaccines").where("ownerId", "==", uid).get();
     const vaccines = vaccinesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // Fetch medications
-    const medsSnap = await adminDb.collection("medications").where("ownerId", "==", uid).get();
     const medications = medsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // Fetch visits
-    const visitsSnap = await adminDb.collection("vetVisits").where("ownerId", "==", uid).get();
     const vetVisits = visitsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     const exportData = {

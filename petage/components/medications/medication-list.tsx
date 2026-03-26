@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { Medication } from "@/lib/types";
 import MedicationCard from "./medication-card";
 import { PillIcon, ChevronDownIcon, ChevronUpIcon } from "./med-icons";
@@ -10,6 +10,14 @@ interface MedicationListProps {
 
 export default function MedicationList({ medications, petId }: MedicationListProps) {
   const [showArchived, setShowArchived] = useState(false);
+
+  const { activeMeds, archivedMeds } = useMemo(() => {
+    const active = medications.filter(m => !m.isArchived);
+    const archived = medications.filter(m => m.isArchived);
+    active.sort((a, b) => (a.nextDueDate?.toMillis?.() ?? 0) - (b.nextDueDate?.toMillis?.() ?? 0));
+    archived.sort((a, b) => a.name.localeCompare(b.name));
+    return { activeMeds: active, archivedMeds: archived };
+  }, [medications]);
 
   if (medications.length === 0) {
     return (
@@ -24,19 +32,6 @@ export default function MedicationList({ medications, petId }: MedicationListPro
       </div>
     );
   }
-
-  const activeMeds = medications.filter(m => !m.isArchived);
-  const archivedMeds = medications.filter(m => m.isArchived);
-
-  // Sort active: closest due date first
-  activeMeds.sort((a, b) => {
-    const aTs = a.nextDueDate?.toMillis?.() ?? 0;
-    const bTs = b.nextDueDate?.toMillis?.() ?? 0;
-    return aTs - bTs;
-  });
-
-  // Sort archived: alphabetically
-  archivedMeds.sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="flex flex-col gap-6">

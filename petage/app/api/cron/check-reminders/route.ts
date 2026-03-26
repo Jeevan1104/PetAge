@@ -60,6 +60,28 @@ export async function POST(request: Request) {
       .where("reminderEnabled", "==", true)
       .get();
 
+    // ------------------------------------------------------------------
+    // 3. Check medications nearing next due date
+    // ------------------------------------------------------------------
+    const medsSnap = await adminDb
+      .collection("medications")
+      .where("isArchived", "==", false)
+      .where("reminderSent", "==", false)
+      .where("reminderEnabled", "==", true)
+      .get();
+
+    // Batch-fetch all referenced pet docs in one round-trip
+    const allPetIds = new Set([
+      ...vaccinesSnap.docs.map(d => d.data().petId as string),
+      ...medsSnap.docs.map(d => d.data().petId as string),
+    ]);
+    const petRefs = Array.from(allPetIds).map(id => adminDb.collection("pets").doc(id));
+    const petDocs = petRefs.length > 0 ? await adminDb.getAll(...petRefs) : [];
+    const petNameMap = new Map<string, string>();
+    for (const d of petDocs) {
+      if (d.exists) petNameMap.set(d.id, (d.data()?.name as string) || "your pet");
+    }
+
     for (const vDoc of vaccinesSnap.docs) {
       const v = vDoc.data();
       const owner = userMap.get(v.ownerId as string);
@@ -74,12 +96,7 @@ export async function POST(request: Request) {
         continue; // not within reminder window yet
       }
 
-      // Resolve pet name
-      let petName = "your pet";
-      try {
-        const petDoc = await adminDb.collection("pets").doc(v.petId as string).get();
-        if (petDoc.exists) petName = (petDoc.data()?.name as string) || petName;
-      } catch { /* use default */ }
+      const petName = petNameMap.get(v.petId as string) ?? "your pet";
 
       const html = buildVaccineReminderHtml(
         petName,
@@ -101,16 +118,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // ------------------------------------------------------------------
-    // 3. Check medications nearing next due date
-    // ------------------------------------------------------------------
-    const medsSnap = await adminDb
-      .collection("medications")
-      .where("isArchived", "==", false)
-      .where("reminderSent", "==", false)
-      .where("reminderEnabled", "==", true)
-      .get();
-
     for (const mDoc of medsSnap.docs) {
       const m = mDoc.data();
       const owner = userMap.get(m.ownerId as string);
@@ -125,11 +132,7 @@ export async function POST(request: Request) {
         continue;
       }
 
-      let petName = "your pet";
-      try {
-        const petDoc = await adminDb.collection("pets").doc(m.petId as string).get();
-        if (petDoc.exists) petName = (petDoc.data()?.name as string) || petName;
-      } catch { /* use default */ }
+      const petName = petNameMap.get(m.petId as string) ?? "your pet";
 
       const html = buildMedicationReminderHtml(
         petName,
