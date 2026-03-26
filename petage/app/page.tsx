@@ -6,7 +6,7 @@ import Button from "@/components/ui/Button";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-navy relative overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-[#0B1F3A] relative overflow-hidden flex flex-col">
       {/* Decorative circles */}
       <div className="absolute -top-20 -right-16 w-80 h-80 rounded-full border border-white/[0.06]" />
       <div className="absolute bottom-20 -left-24 w-64 h-64 rounded-full border border-white/[0.04]" />
